@@ -30,23 +30,13 @@
  _STH_DISC              = (_VARIANT = 2)
  _SRAM_DISC             = (_VARIANT = 3)
 
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\GUARD &6000            \ Guard against assembling over screen memory
-
-                        \ --- And replaced by: -------------------------------->
-
- GUARD &7B00            \ Guard against assembling over the missile ship data,
-                        \ which we have moved to &7B00, into the page before
-                        \ mode 7 screen memory
+ GUARD &7C00            \ Guard against assembling over mode 7 screen memory
 
  _DOCKED = TRUE         \ Set compilation flag for docked vs flight code
 
  _LOADER = FALSE        \ Set compilation flag for loader
 
  INCLUDE "1-source-files/main-sources/elite-teletext-macros.asm"
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -57,18 +47,6 @@
  CODE% = &2400          \ The address where the code will be run
 
  LOAD% = &2400          \ The address where the code will be loaded
-
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\NOST = 18              \ The number of stardust particles in normal space (this
-                        \ goes down to 3 in witchspace)
-
-                        \ --- And replaced by: -------------------------------->
-
- NOST = 10              \ The number of stardust particles in normal space (this
-                        \ goes down to 3 in witchspace)
-
-                        \ --- End of replacement ------------------------------>
 
  NOSH = 1               \ The maximum number of ships in our local bubble of
                         \ universe
@@ -115,20 +93,6 @@
 
  CON = 31               \ Ship type for a Constrictor
 
- JL = ESC               \ Junk is defined as starting from the escape pod
-
- JH = SHU+2             \ Junk is defined as ending before the Cobra Mk III
-                        \
-                        \ So junk is defined as the following: escape pod,
-                        \ alloy plate, cargo canister, asteroid, splinter,
-                        \ Shuttle or Transporter
-
- POW = 15               \ Pulse laser power
-
- Mlas = 50              \ Mining laser power
-
- Armlas = INT(128.5 + 1.5*POW)  \ Military laser power
-
  NI% = 37               \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
@@ -136,91 +100,11 @@
 
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
- f0 = &20               \ Internal key number for red key f0 (Launch, Front)
-
- f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
-
- f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
-
- f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
-
- f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
-
- f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
-
- f6 = &75               \ Internal key number for red key f6 (Data on System)
-
- f7 = &16               \ Internal key number for red key f7 (Market Price)
-
- f8 = &76               \ Internal key number for red key f8 (Status Mode)
-
- f9 = &77               \ Internal key number for red key f9 (Inventory)
-
- NRU% = 25              \ The number of planetary systems with extended system
-                        \ description overrides in the RUTOK table
-
- RE = &23               \ The obfuscation byte used to hide the recursive tokens
-                        \ table from crackers viewing the binary code
-
- VE = &57               \ The obfuscation byte used to hide the extended tokens
-                        \ table from crackers viewing the binary code
-
- LL = 30                \ The length of lines (in characters) of justified text
-                        \ in the extended tokens system
-
- QQ18 = &0400           \ The address of the text token table, as set in
-                        \ elite-loader3.asm
-
- SNE = &07C0            \ The address of the sine lookup table, as set in
-                        \ elite-loader3.asm
-
- QQ16_FLIGHT = &0880    \ The address of the two-letter text token table in the
-                        \ flight code (this gets populated by the docked code at
-                        \ the start of the game)
-
- LS% = &0CFF            \ The start of the descending ship line heap
-
- CATD = &0D7A           \ The address of the CATD routine that is put in place
-                        \ by the third loader, as set in elite-loader3.asm
-
- IRQ1 = &1100           \ The address of the IRQ1 routine that implements the
-                        \ split screen interrupt handler, as set in
-                        \ elite-loader3.asm
-
- BRBR1 = &11D5          \ The address of the main break handler, which BRKV
-                        \ points to as set in elite-loader3.asm
-
- NA% = &1181            \ The address of the data block for the last saved
-                        \ commander, as set in elite-loader3.asm
-
- CHK2 = &11D3           \ The address of the second checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
-
- CHK = &11D4            \ The address of the first checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
-
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
-                        \ elite-loader3.asm
-
-                        \ --- And replaced by: -------------------------------->
-
- SHIP_MISSILE = &7B00   \ The address of the missile ship blueprint, as set in
-                        \ elite-loader3.asm, which we have moved to &7B00, into
-                        \ the page before mode 7 screen memory
-
-                        \ --- End of replacement ------------------------------>
-
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
-
- OSWORD = &FFF1         \ The address for the OSWORD routine
-
- OSFILE = &FFDD         \ The address for the OSFILE routine
 
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
 
@@ -770,14 +654,6 @@
 
  SKIP 1                 \ Temporary storage, used in a number of places
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\.XX14
-\
-\SKIP 1                 \ This byte appears to be unused
-
-                        \ --- And replaced by: -------------------------------->
-
 .LSNUM
 
  SKIP 1                 \ The pointer to the current position in the ship line
@@ -791,8 +667,6 @@
                         \ we are drawing in LL9, i.e. the number of lines in the
                         \ old ship that is currently shown on-screen and which
                         \ we need to erase
-
-                        \ --- End of replacement ------------------------------>
 
 .RAT
 
@@ -900,6 +774,12 @@
 .K%
 
  SKIP NOSH * NI%        \ Ship data blocks and ship line heap
+
+ SKIP 255               \ Ship line heap
+
+.LS%
+
+ SKIP 1
 
 \ ******************************************************************************
 \
@@ -1940,12 +1820,6 @@
 
 .LOIN
 
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-                        \ The whole LOIN routine has been removed
-
-                        \ --- And replaced by: -------------------------------->
-
  STY YSAV               \ Store Y into YSAV, so we can preserve it across the
                         \ call to this subroutine
 
@@ -1978,8 +1852,6 @@
 .HL6
 
  RTS                    \ Return from the subroutine
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2210,48 +2082,6 @@
  STA P
 
  RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: FMLTU2
-\       Type: Subroutine
-\   Category: Maths (Arithmetic)
-\    Summary: Calculate A = K * sin(A)
-\  Deep dive: The sine, cosine and arctan tables
-\
-\ ------------------------------------------------------------------------------
-\
-\ Calculate the following:
-\
-\   A = K * sin(A)
-\
-\ Because this routine uses the sine lookup table SNE, we can also call this
-\ routine to calculate cosine multiplication. To calculate the following:
-\
-\   A = K * cos(B)
-\
-\ call this routine with B + 16 in the accumulator, as sin(B + 16) = cos(B).
-\
-\ ******************************************************************************
-
-.FMLTU2
-
- AND #%00011111         \ Restrict A to bits 0-5 (so it's in the range 0-31)
-
- TAX                    \ Set Q = sin(A) * 256
- LDA SNE,X
- STA Q
-
- LDA K                  \ Set A to the radius in K
-
-                        \ Fall through into FMLTU to do the following:
-                        \
-                        \   (A ?) = A * Q
-                        \         = K * sin(A) * 256
-                        \
-                        \ which is equivalent to:
-                        \
-                        \   A = K * sin(A)
 
 \ ******************************************************************************
 \
@@ -4291,13 +4121,6 @@
 
 .SHPPT
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\JSR EE51               \ Call EE51 to remove the ship's wireframe from the
-\                       \ screen, if there is one
-
-                        \ --- End of removed code ----------------------------->
-
  LDA #Y                 \ Set A = the y-coordinate of a dot halfway down the
                         \ screen
 
@@ -4307,68 +4130,16 @@
                         \ never happen, but this code is copied from the flight
                         \ code, where A can contain any y-coordinate
 
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\LDY #2                 \ Call Shpt with Y = 2 to set up bytes 1-4 in the ship
-\JSR Shpt               \ lines space, aborting the call to LL9 if the dot is
-\                       \ off the side of the screen. This call sets up the
-\                       \ first row of the dot (i.e. a four-pixel dash)
-\
-\LDA #Y                 \ Set A = y-coordinate of dot + 1 (so this is the second
-\CLC                    \ row of the two-pixel-high dot)
-\ADC #1
-\
-\JSR Shpt               \ Call Shpt with Y = 6 to set up bytes 5-8 in the ship
-\                       \ lines space, aborting the call to LL9 if the dot is
-\                       \ off the side of the screen. This call sets up the
-\                       \ second row of the dot (i.e. another four-pixel dash,
-\                       \ on the row below the first one)
-\
-\LDY #6                 \ Set Y to 6 for the next call to Shpt
-\
-\LDA #Y                 \ Set A = #Y + 1 (so this is the second row of the
-\ADC #1                 \ two-pixel-high dot halfway down the screen)
-\                       \
-\                       \ The addition works as the Shpt routine clears the C
-\                       \ flag
-\
-\JSR Shpt               \ Call Shpt with Y = 6 to set up bytes 5-8 in the ship
-\                       \ lines space, aborting the call to LL9 if the dot is
-\                       \ off the side of the screen. This call sets up the
-\                       \ second row of the dot (i.e. another four-pixel dash,
-\                       \ on the row below the first one)
-
-                        \ --- And replaced by: -------------------------------->
-
  JSR Shpt               \ Call Shpt to draw a horizontal 4-pixel dash for the 
                         \ first row of the dot (i.e. a four-pixel dash)
-
-                        \ --- End of removed code ----------------------------->
 
  LDA #%00001000         \ Set bit 3 of the ship's byte #31 to record that we
  ORA XX1+31             \ have now drawn something on-screen for this ship
  STA XX1+31
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDA #8                 \ Set A = 8 so when we call LL18+2 next, byte #0 of the
-\                       \ heap gets set to 8, for the 8 bytes we just stuck on
-\                       \ the heap
-\
-\JMP LL81+2             \ Call LL81+2 to draw the ship's dot, returning from the
-\                       \ subroutine using a tail call
-\
-\PLA                    \ Pull the return address from the stack, so the RTS
-\PLA                    \ below actually returns from the subroutine that called
-\                       \ LL9 (as we called SHPPT from LL9 with a JMP)
-
-                        \ --- And replaced by: -------------------------------->
-
  JMP LL155              \ Jump to LL155 to draw any remaining lines that are
                         \ still in the ship line heap and return from the
                         \ subroutine using a tail call
-
-                        \ --- End of replacement ------------------------------>
 
 .nono
 
@@ -4376,36 +4147,11 @@
  AND XX1+31             \ nothing is being drawn on-screen for this ship
  STA XX1+31
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\RTS                    \ Return from the subroutine
-
-                        \ --- And replaced by: -------------------------------->
-
  JMP LL155              \ Jump to LL155 to draw any remaining lines that are
                         \ still in the ship line heap and return from the
                         \ subroutine using a tail call
 
-                        \ --- End of replacement ------------------------------>
-
 .Shpt
-
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\                       \ This routine sets up four bytes in the ship line heap,
-\                       \ from byte Y-1 to byte Y+2. If the ship's screen point
-\                       \ turns out to be off-screen, then this routine aborts
-\                       \ the entire call to LL9, exiting via nono. The four
-\                       \ bytes define a horizontal 4-pixel dash, for either the
-\                       \ top or the bottom of the ship's dot
-\
-\STA (XX19),Y           \ Store A in byte Y of the ship line heap (i.e. Y1)
-\
-\INY                    \ Store A in byte Y+2 of the ship line heap (i.e. Y2)
-\INY
-\STA (XX19),Y
-
-                        \ --- And replaced by: -------------------------------->
 
                         \ This routine draws a horizontal 4-pixel dash, for
                         \ either the top or the bottom of the ship's dot
@@ -4413,50 +4159,13 @@
  STA Y1                 \ Store A in both y-coordinates, as this is a horizontal
  STA Y2                 \ dash at y-coordinate A
 
-                        \ --- End of replacement ------------------------------>
-
  LDA #X                 \ Set A = x-coordinate of the middle of the screen
-
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\DEY                    \ Store A in byte Y+1 of the ship line heap (i.e. X2)
-\STA (XX19),Y
-\
-\ADC #3                 \ Set A = screen x-coordinate of the ship dot + 3
-\
-\BCS nono-2             \ If the addition pushed the dot off the right side of
-\                       \ the screen, jump to nono-2 to return from the parent
-\                       \ subroutine early (i.e. LL9). This works because we
-\                       \ called Shpt from above with a JSR, so nono-2 removes
-\                       \ that return address from the stack, leaving the next
-\                       \ return address exposed. LL9 called SHPPT with a JMP.
-\                       \ so the next return address is the one that was put on
-\                       \ the stack by the original call to LL9. So the RTS in
-\                       \ nono will actually return us from the original call
-\                       \ to LL9, thus aborting the entire drawing process
-\
-\DEY                    \ Store A in byte Y-1 of the ship line heap (i.e. X1)
-\DEY
-\STA (XX19),Y
-\
-\RTS                    \ Return from the subroutine
-
-                        \ --- And replaced by: -------------------------------->
 
  STA X1                 \ Store the x-coordinate of the ship dot in X1, as this
                         \ is where the dash starts
 
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\CLC                    \ Set A = screen x-coordinate of the ship dot + 3
-\ADC #3
-
-                        \ --- And replaced by: -------------------------------->
-
  CLC                    \ Set A = screen x-coordinate of the ship dot + 8
  ADC #8
-
-                        \ --- End of replacement ------------------------------>
 
  BCC P%+4               \ If the addition overflowed, set A = 255, the
  LDA #255               \ x-coordinate of the right edge of the screen
@@ -4468,8 +4177,6 @@
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen, and return
                         \ from the subroutine using a tail call
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -4926,8 +4633,6 @@
                         \ update this value below with the actual ship's
                         \ distance if it turns out to be visible on-screen
 
-                        \ --- Mod: Code added for flicker-free ships: --------->
-
                         \ We now set things up for smooth ship plotting, by
                         \ setting the following:
                         \
@@ -4958,8 +4663,6 @@
 
  LDA (XX19),Y           \ Set LSNUM2 to the first byte of the ship's line heap,
  STA LSNUM2             \ which contains the number of bytes in the heap
-
-                        \ --- End of added code ------------------------------->
 
  LDA #%00100000         \ If bit 5 of the ship's byte #31 is set, then the ship
  BIT XX1+31             \ is currently exploding, so jump down to EE28
@@ -6713,36 +6416,11 @@
 
 .LL72
 
-\LDA XX1+31             \ If bit 5 of the ship's byte #31 is clear, then the
-\AND #%00100000         \ ship is not currently exploding, so jump down to EE31
-\BEQ EE31
-
-\LDA XX1+31             \ The ship is exploding, so set bit 3 of the ship's byte
-\ORA #%00001000         \ #31 to denote that we are drawing something on-screen
-\STA XX1+31             \ for this ship
-
-\JMP DOEXP              \ Jump to DOEXP to display the explosion cloud,
-                        \ returning from the subroutine using a tail call
-
 .EE31
-
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDA #%00001000         \ If bit 3 of the ship's byte #31 is clear, then there
-\BIT XX1+31             \ is nothing already being shown for this ship, so skip
-\BEQ LL74               \ to LL74 as we don't need to erase anything from the
-\                       \ screen
-\
-\JSR LL155              \ Otherwise call LL155 to draw the existing ship, which
-\                       \ removes it from the screen
-
-                        \ --- And replaced by: -------------------------------->
 
  LDY #9                 \ Fetch byte #9 of the ship's blueprint, which is the
  LDA (XX0),Y            \ number of edges, and store it in XX20
  STA XX20
-
-                        \ --- End of replacement ------------------------------>
 
  LDA #%00001000         \ Set bit 3 of A so the next instruction sets bit 3 of
                         \ the ship's byte #31 to denote that we are drawing
@@ -6754,31 +6432,8 @@
  STA XX1+31             \ was no ship already on screen, the bit is clear,
                         \ otherwise it is set
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDY #9                 \ Fetch byte #9 of the ship's blueprint, which is the
-\LDA (XX0),Y            \ number of edges, and store it in XX20
-\STA XX20
-\
-\LDY #0                 \ We are about to step through all the edges, using Y
-\                       \ as a counter
-\
-\STY U                  \ Set U = 0 (though we increment it to 1 below)
-\
-\STY XX17               \ Set XX17 = 0, which we are going to use as a counter
-\                       \ for stepping through the ship's edges
-\
-\INC U                  \ We are going to start calculating the lines we need to
-\                       \ draw for this ship, and will store them in the ship
-\                       \ line heap, using U to point to the end of the heap, so
-\                       \ we start by setting U = 1
-
-                        \ --- And replaced by: -------------------------------->
-
  LDY #0                 \ Set XX17 = 0, which we are going to use as a counter
  STY XX17               \ for stepping through the ship's edges
-
-                        \ --- End of replacement ------------------------------>
 
  BIT XX1+31             \ If bit 6 of the ship's byte #31 is clear, then the
  BVC LL170              \ ship is not firing its lasers, so jump to LL170 to
@@ -6860,40 +6515,9 @@
                         \ screen, so jump to LL170 so we don't store this line
                         \ in the ship line heap
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDY U                  \ Fetch the ship line heap pointer, which points to the
-\                       \ next free byte on the heap, into Y
-\
-\LDA XX15               \ Add X1 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+1             \ Add Y1 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+2             \ Add X2 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+3             \ Add Y2 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\STY U                  \ Store the updated ship line heap pointer in U
-
-                        \ --- And replaced by: -------------------------------->
-
  JSR LSPUT              \ Draw the laser line using smooth animation, by first
                         \ drawing the new laser line and then erasing the
                         \ corresponding old line from the screen
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -6930,19 +6554,6 @@
                         \ So V(1 0) now points to the start of the edges data
                         \ for this ship
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDY #5                 \ Fetch byte #5 of the ship's blueprint, which contains
-\LDA (XX0),Y            \ the maximum heap size for plotting the ship (which is
-\STA T1                 \ 1 + 4 * the maximum number of visible edges) and store
-\                       \ it in T1
-\
-\LDY XX17               \ Set Y to the edge counter in XX17
-\
-\.LL75
-
-                        \ --- And replaced by: -------------------------------->
-
  LDY #5                 \ Fetch byte #5 of the ship's blueprint, which contains
  LDA (XX0),Y            \ the maximum heap size for plotting the ship (which is
  STA CNT                \ 1 + 4 * the maximum number of visible edges) and store
@@ -6951,8 +6562,6 @@
 .LL75
 
  LDY #0                 \ Set Y = 0 so we start with byte #0
-
-                        \ --- End of replacement ------------------------------>
 
  LDA (V),Y              \ Fetch byte #0 for this edge, which contains the
                         \ visibility distance for this edge, beyond which the
@@ -6973,12 +6582,6 @@
                         \
                         \     * Bits 4-7 = the number of face 2
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\INY                    \ Increment Y to point to byte #2
-
-                        \ --- End of removed code ----------------------------->
-
  STA P                  \ Store byte #1 into P
 
  AND #%00001111         \ Extract the number of face 1 into X
@@ -6998,12 +6601,6 @@
  LDA XX2,X              \ If XX2+X is zero then we decided in part 5 that
  BEQ LL78               \ face 2 is hidden, so jump to LL78
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\JMP LL78               \ Face 2 is hidden, so jump to LL78
-
-                        \ --- End of removed code ----------------------------->
-
 .LL79
 
                         \ We now build the screen line for this edge, as
@@ -7021,24 +6618,10 @@
                         \ before storing the resulting line in the ship line
                         \ heap
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDA (V),Y              \ Fetch byte #2 for this edge into X, which contains
-\TAX                    \ the number of the vertex at the start of the edge
-\
-\INY                    \ Increment Y to point to byte #3
-\
-\LDA (V),Y              \ Fetch byte #3 for this edge into Q, which contains
-\STA Q                  \ the number of the vertex at the end of the edge
-
-                        \ --- And replaced by: -------------------------------->
-
  INY                    \ Increment Y to point to byte #2
 
  LDA (V),Y              \ Fetch byte #2 for this edge into X, which contains
  TAX                    \ the number of the vertex at the start of the edge
-
-                        \ --- End of replacement ------------------------------>
 
  LDA XX3+1,X            \ Fetch the x_hi coordinate of the edge's start vertex
  STA XX15+1             \ from the XX3 heap into XX15+1
@@ -7052,19 +6635,10 @@
  LDA XX3+3,X            \ Fetch the y_hi coordinate of the edge's start vertex
  STA XX15+3             \ from the XX3 heap into XX15+3
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\LDX Q                  \ Set X to the number of the vertex at the end of the
-\                       \ edge, which we stored in Q
-
-                        \ --- And replaced by: -------------------------------->
-
  INY                    \ Increment Y to point to byte #3
 
  LDA (V),Y              \ Fetch byte #3 for this edge into X, which contains
  TAX                    \ the number of the vertex at the end of the edge
-
-                        \ --- End of replacement ------------------------------>
 
  LDA XX3,X              \ Fetch the x_lo coordinate of the edge's end vertex
  STA XX15+4             \ from the XX3 heap into XX15+4
@@ -7086,17 +6660,9 @@
                         \ screen, so jump to LL78 so we don't store this line
                         \ in the ship line heap
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\JMP LL80               \ Jump down to part 11 to draw this edge
-
-                        \ --- And replaced by: -------------------------------->
-
  JSR LSPUT              \ Draw this edge using smooth animation, by first
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -7118,56 +6684,6 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\.LL80
-\
-\LDY U                  \ Fetch the ship line heap pointer, which points to the
-\                       \ next free byte on the heap, into Y
-\
-\LDA XX15               \ Add X1 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+1             \ Add Y1 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+2             \ Add X2 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\LDA XX15+3             \ Add Y2 to the end of the heap
-\STA (XX19),Y
-\
-\INY                    \ Increment the heap pointer
-\
-\STY U                  \ Store the updated ship line heap pointer in U
-\
-\CPY T1                 \ If Y >= T1 then we have reached the maximum number of
-\BCS LL81               \ edge lines that we can store in the ship line heap, so
-\                       \ skip to LL81 so we don't loop back for the next edge
-\
-\.LL78
-\
-\INC XX17               \ Increment the edge counter to point to the next edge
-\
-\LDY XX17               \ If Y >= XX20, which contains the number of edges in
-\CPY XX20               \ the blueprint, jump to LL81 as we have processed all
-\BCS LL81               \ the edges and don't need to loop back for the next one
-\
-\LDY #0                 \ Set Y to point to byte #0 again, ready for the next
-\                       \ edge
-\
-\LDA V                  \ Increment V by 4 so V(1 0) points to the data for the
-\ADC #4                 \ next edge
-\STA V
-
-                        \ --- And replaced by: -------------------------------->
-
 .LL78
 
  LDA LSNUM              \ If LSNUM >= CNT, skip to LL81 so we don't loop back
@@ -7181,33 +6697,12 @@
  ADC #4
  STA V
 
-                        \ --- End of replacement ------------------------------>
-
  BCC ll81               \ If the above addition didn't overflow, jump to ll81
 
  INC V+1                \ Otherwise increment the high byte of V(1 0), as we
                         \ just moved the V(1 0) pointer past a page boundary
 
 .ll81
-
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\JMP LL75               \ Loop back to LL75 to process the next edge
-\
-\.LL81
-\
-\                       \ We have finished adding lines to the ship line heap,
-\                       \ so now we need to set the first byte of the heap to
-\                       \ the number of bytes stored there
-\
-\LDA U                  \ Fetch the ship line heap pointer from U into A, which
-\                       \ points to the end of the heap, and therefore contains
-\                       \ the heap size
-\
-\LDY #0                 \ Store A as the first byte of the ship line heap, so
-\STA (XX19),Y           \ the heap is now correctly set up
-
-                        \ --- And replaced by: -------------------------------->
 
  INC XX17               \ Increment the edge counter to point to the next edge
 
@@ -7219,8 +6714,6 @@
 
  JMP LL155              \ Jump down to part 12 below to draw any remaining lines
                         \ from the old ship that are still in the ship line heap
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -7753,27 +7246,6 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\.LL155
-\
-\LDY #0                 \ Fetch the first byte from the ship line heap into A,
-\LDA (XX19),Y           \ which contains the number of bytes in the heap
-\
-\STA XX20               \ Store the heap size in XX20
-\
-\CMP #4                 \ If the heap size is less than 4, there is nothing to
-\BCC LL118-1            \ draw, so return from the subroutine (as LL118-1
-\                       \ contains an RTS)
-\
-\INY                    \ Set Y = 1, which we will use as an index into the ship
-\                       \ line heap, starting at byte #1 (as byte #0 contains
-\                       \ the heap size)
-\
-\.LL27
-
-                        \ --- And replaced by: -------------------------------->
-
 .LL155
 
  LDY LSNUM              \ Set Y to the offset in the line heap LSNUM
@@ -7789,8 +7261,6 @@
                         \ If we get here then Y < LSNUM2, which means Y is
                         \ pointing to an on-screen line from the old ship that
                         \ we need to erase
-
-                        \ --- End of replacement ------------------------------>
 
  LDA (XX19),Y           \ Fetch the X1 line coordinate from the heap and store
  STA XX15               \ it in XX15
@@ -7815,17 +7285,6 @@
 
  INY                    \ Increment the heap pointer
 
-                        \ --- Mod: Code removed for flicker-free ships: ------->
-
-\CPY XX20               \ If the heap counter is less than the size of the heap,
-\BCC LL27               \ loop back to LL27 to draw the next line from the heap
-\
-\.LL82                  \ This label is commented out in the original source
-\
-\RTS                    \ Return from the subroutine
-
-                        \ --- And replaced by: -------------------------------->
-
  JMP LL27               \ Loop back to LL27 to draw (i.e. erase) the next line
                         \ from the heap
 
@@ -7838,8 +7297,6 @@
 .LL82
 
  RTS                    \ Return from the subroutine
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -7895,8 +7352,6 @@
 \   LSNUM               The offset of the next line in the line heap
 \
 \ ******************************************************************************
-
-                        \ --- Mod: Code added for flicker-free ships: --------->
 
 .LSPUT
 
@@ -7966,8 +7421,6 @@
                         \ point to a line that is still on-screen, so call LL30
                         \ to draw this line and erase it from the screen,
                         \ returning from the subroutine using a tail call
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -8508,8 +7961,6 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
 .PrintZeroString
 
  LDY #0                 \ Sey Y = 0 to act as an index into the string
@@ -8531,8 +7982,6 @@
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added code ------------------------------->
-
 \ ******************************************************************************
 \
 \       Name: titleText
@@ -8542,14 +7991,10 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
 .titleText
 
- EQUS "ELITE OVER ECONET"
+ EQUS "Elite Over Econet"
  EQUB 0
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

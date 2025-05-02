@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ TELETEXT ELITE DISC IMAGE SCRIPT
+\ ELITE OVER ECONET SERVER MENU DISC IMAGE SCRIPT
 \
 \ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
 \
@@ -22,7 +22,6 @@
 \ which release is being built:
 \
 \   * elite-disc-sth.ssd
-\   * elite-disc-ib-disc.ssd
 \
 \ This can be loaded into an emulator or a real BBC Micro.
 \

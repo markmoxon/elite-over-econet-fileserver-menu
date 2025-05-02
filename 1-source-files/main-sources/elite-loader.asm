@@ -931,27 +931,25 @@
  
  NEXT
 
- LDA #LO(MODE7_VRAM+MODE7_INDENT+10)     \ Print the title text
+ LDA #LO(MODE7_VRAM+MODE7_INDENT+9)      \ Print the title text
  STA ZP
- LDA #HI(MODE7_VRAM+MODE7_INDENT+10)
+ LDA #HI(MODE7_VRAM+MODE7_INDENT+9)
  STA ZP+1
  LDA #LO(text1)
  STA P
  LDA #HI(text1)
  STA P+1
- LDY #14
- JSR PrintText
+ JSR PrintZeroString
 
- LDA #LO(MODE7_VRAM+(23*&28)+MODE7_INDENT+8)   \ Print the subtitle text
+ LDA #LO(MODE7_VRAM+(23*&28)+MODE7_INDENT+5)   \ Print the subtitle text
  STA ZP
- LDA #HI(MODE7_VRAM+(23*&28)+MODE7_INDENT+8)
+ LDA #HI(MODE7_VRAM+(23*&28)+MODE7_INDENT+5)
  STA ZP+1
  LDA #LO(text2)
  STA P
  LDA #HI(text2)
  STA P+1
- LDY #17
- JSR PrintText
+ JSR PrintZeroString
 
  JMP PLL1               \ Draw Saturn, returning from the subroutine using a
                         \ tail call
@@ -960,27 +958,33 @@
 
 \ ******************************************************************************
 \
-\       Name: PrintText
+\       Name: PrintZeroString
 \       Type: Subroutine
 \   Category: Teletext Elite
-\    Summary: Print a string
+\    Summary: Print a null-terminated string
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
+.PrintZeroString
 
-.PrintText
+ LDY #0                 \ Sey Y = 0 to act as an index into the string
 
- LDA (P),Y              \ Copy the Y-th byte of the message from P(1 0) to
- STA (ZP),Y             \ ZP(1 0)
+.pzer1
 
- DEY                    \ Decrement the counter
+ LDA (P),Y              \ Copy the Y-th byte of the message from P(1 0)
 
- BPL PrintText          \ Loop back until we have printed the whole message
+ BEQ pzer2              \ If it is zero, jump to pzer2 to return from the
+                        \ subroutine
+
+ STA (ZP),Y             \ Poke the byte into screen memory in ZP(1 0)
+
+ INY                    \ Increment the index
+
+ BPL pzer1              \ Loop back to print the next character
+
+.pzer2
 
  RTS                    \ Return from the subroutine
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -995,7 +999,8 @@
 
 .text1
 
- EQUS "ACORNSOFT ELITE"
+ EQUS "Elite Over Econet"
+ EQUB 0
 
                         \ --- End of added code ------------------------------->
 
@@ -1012,7 +1017,8 @@
 
 .text2
 
- EQUS "(C) Acornsoft 1984"
+ EQUS "On the TNMoC Econet Cloud"
+ EQUB 0
 
                         \ --- End of added code ------------------------------->
 
