@@ -35,4 +35,4 @@
  _SRAM_DISC             = (_VARIANT = 3)
 
  PUTFILE "3-assembled-output/MENU.bin", "MENU", &FF3000, &FF300C
- PUTFILE "3-assembled-output/MENU2.bin", "MENU2", &0011E3, &0011E6
+ PUTFILE "3-assembled-output/MENU2.bin", "MENU2", &FF2400, &FF2400
