@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ TELETEXT ELITE DOCKED SOURCE
+\ ELITE OVER ECONET SERVER MENU SOURCE (Part 2)
 \
 \ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
 \
@@ -20,7 +20,7 @@
 \
 \ This source file produces the following binary file:
 \
-\   * T.CODE.unprot.bin
+\   * MENU2.bin
 \
 \ ******************************************************************************
 
@@ -183,7 +183,7 @@
  CATD = &0D7A           \ The address of the CATD routine that is put in place
                         \ by the third loader, as set in elite-loader3.asm
 
- IRQ1 = &114B           \ The address of the IRQ1 routine that implements the
+ IRQ1 = &1100           \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
                         \ elite-loader3.asm
 
@@ -2072,7 +2072,7 @@
 
  EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 
- JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
+ JMP BRBR               \ BRKV is set to point here by elite-loader3.asm
 
  BRKV = P% - 2          \ The address of the destination address in the above
                         \ JMP BRBR1 instruction. This ensures that any code that
@@ -2118,7 +2118,7 @@
 
 .DOBEGIN
 
- JSR DEEOR              \ Decrypt the main docked code between &1300 and &5FFF
+\JSR DEEOR              \ Decrypt the main docked code between &1300 and &5FFF
 
  JMP BEGIN              \ Jump to BEGIN to initialise the configuration
                         \ variables and start the game
@@ -2135,52 +2135,6 @@
 
 .DEEOR
 
-IF _STH_DISC OR _IB_DISC
-
- LDY #0                 \ We're going to work our way through a large number of
-                        \ encrypted bytes, so we set Y to 0 to be the index of
-                        \ the current byte within its page in memory
-
- STY SC                 \ Set the low byte of SC(1 0) to 0
-
- LDX #&13               \ Set X to &13 to be the page number of the current
-                        \ byte, so we start the decryption with the first byte
-                        \ of page &13
-
-.DEEORL
-
- STX SCH                \ Set the high byte of SC(1 0) to X, so SC(1 0) now
-                        \ points to the first byte of page X
-
- TYA                    \ Set A to Y, so A now contains the index of the current
-                        \ byte within its page
-
- EOR (SC),Y             \ EOR the current byte with its index within the page
-
- EOR #&33               \ EOR the current byte with &33
-
- STA (SC),Y             \ Update the current byte
-
-                        \ The current byte is in page X at offset Y, and SC(1 0)
-                        \ points to the first byte of page X, so we just did
-                        \  this:
-                        \
-                        \   (X Y) = (X Y) EOR Y EOR &33
-
- DEY                    \ Decrement the index in Y to point to the next byte
-
- BNE DEEORL             \ Loop back to DEEORL to decrypt the next byte until we
-                        \ have done the whole page
-
- INX                    \ Increment X to point to the next page in memory
-
- CPX #&60               \ Loop back to DEEORL to decrypt the next page until we
- BNE DEEORL             \ reach the start of page &60
-
- JMP BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
-                        \ and return from the subroutine using a tail call
-
-ELIF _SRAM_DISC
 
  NOP                    \ The sideways RAM variant is not encrypted, so the
  NOP                    \ decryption code is disabled and is replaced by NOPs
@@ -2208,8 +2162,6 @@ ELIF _SRAM_DISC
 
  JMP BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
                         \ and return from the subroutine using a tail call
-
-ENDIF
 
 \ ******************************************************************************
 \
@@ -2399,10 +2351,10 @@ ENDIF
 
 .BRKBK
 
- LDA #LO(BRBR)          \ Set BRKV to point to the BRBR routine
- STA BRKV
- LDA #HI(BRBR)
- STA BRKV+1
+\LDA #LO(BRBR)          \ Set BRKV to point to the BRBR routine
+\STA BRKV
+\LDA #HI(BRBR)
+\STA BRKV+1
 
  RTS                    \ Return from the subroutine
 
@@ -3478,9 +3430,9 @@ ENDIF
 
 .MVEIT
 
- LDA INWK+31            \ If bit 5 of ship byte #31 is set, jump to MV3 as the
- AND #%00100000         \ ship is exploding, so we don't need to tidy its
- BNE MV3                \ orientation vectors
+\LDA INWK+31            \ If bit 5 of ship byte #31 is set, jump to MV3 as the
+\AND #%00100000         \ ship is exploding, so we don't need to tidy its
+\BNE MV3                \ orientation vectors
 
  LDA MCNT               \ Fetch the main loop counter
 
@@ -3633,6 +3585,8 @@ ENDIF
  LDX #19                \ Rotate (roofv_z, sidev_z) by a small angle (roll)
  LDY #25
  JSR MVS5
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -16051,7 +16005,7 @@ ENDIF
  BPL eny1               \ Loop back to copy the next byte until we have copied
                         \ the whole table
 
- JSR CATD               \ Call CATD to reload the disc catalogue
+\JSR CATD               \ Call CATD to reload the disc catalogue
 
  LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
  LDY #HI(RDLI)
@@ -20339,22 +20293,21 @@ ENDIF
 
  BPL SAL3               \ Loop back for the next byte to zero
 
- TXA                    \ X is now negative - i.e. &FF - so this sets A and QQ12
- STA QQ12               \ to &FF to indicate we are docked
+\TXA                    \ X is now negative - i.e. &FF - so this sets A and QQ12
+\STA QQ12               \ to &FF to indicate we are docked
 
- LDX #2                 \ We're now going to recharge both shields and the
+\LDX #2                 \ We're now going to recharge both shields and the
                         \ energy bank, which live in the three bytes at FSH,
                         \ ASH (FSH+1) and ENERGY (FSH+2), so set a loop counter
                         \ in X for 3 bytes
+\.REL5
 
-.REL5
-
- STA FSH,X              \ Set the X-th byte of FSH to &FF to charge up that
+\STA FSH,X              \ Set the X-th byte of FSH to &FF to charge up that
                         \ shield/bank
 
- DEX                    \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 
- BPL REL5               \ Loop back to REL5 until we have recharged both shields
+\BPL REL5               \ Loop back to REL5 until we have recharged both shields
                         \ and the energy bank
 
                         \ Fall through into RES2 to reset the stardust and ship
@@ -20383,14 +20336,14 @@ ENDIF
 
 .RES2
 
- LDA #NOST              \ Reset NOSTM, the number of stardust particles, to the
- STA NOSTM              \ maximum allowed (18)
+\LDA #NOST              \ Reset NOSTM, the number of stardust particles, to the
+\STA NOSTM              \ maximum allowed (18)
 
- LDX #&FF               \ Reset LSX2 and LSY2, the ball line heaps used by the
- STX LSX2               \ BLINE routine for drawing circles, to &FF, to set the
- STX LSY2               \ heap to empty
+\LDX #&FF               \ Reset LSX2 and LSY2, the ball line heaps used by the
+\STX LSX2               \ BLINE routine for drawing circles, to &FF, to set the
+\STX LSY2               \ heap to empty
 
- STX MSTG               \ Reset MSTG, the missile target, to &FF (no target)
+\STX MSTG               \ Reset MSTG, the missile target, to &FF (no target)
 
  LDA #128               \ Set the current pitch rate to the mid-point, 128
  STA JSTY
@@ -20407,21 +20360,21 @@ ENDIF
 
 .modify
 
- LDA #3                 \ Reset DELTA (speed) to 3
- STA DELTA
+\LDA #3                 \ Reset DELTA (speed) to 3
+\STA DELTA
 
  STA ALPHA              \ Reset ALPHA (roll angle alpha) to 3
 
  STA ALP1               \ Reset ALP1 (magnitude of roll angle alpha) to 3
 
- LDA ECMA               \ Fetch the E.C.M. status flag, and if E.C.M. is off,
- BEQ yu                 \ skip the next instruction
+\LDA ECMA               \ Fetch the E.C.M. status flag, and if E.C.M. is off,
+\BEQ yu                 \ skip the next instruction
 
- JSR ECMOF              \ Turn off the E.C.M. sound
+\JSR ECMOF              \ Turn off the E.C.M. sound
 
 .yu
 
- JSR WPSHPS             \ Wipe all ships from the scanner
+\JSR WPSHPS             \ Wipe all ships from the scanner
 
  JSR ZERO               \ Zero-fill pages &9, &A, &B, &C and &D, which clears
                         \ the ship data blocks, the ship line heap, the ship
@@ -20433,7 +20386,7 @@ ENDIF
  LDA #HI(LS%)           \ to indicate that the heap is empty
  STA SLSP+1
 
- JSR DIALS              \ Update the dashboard
+\JSR DIALS              \ Update the dashboard
 
                         \ Finally, fall through into ZINF to reset the INWK
                         \ ship workspace
@@ -21353,7 +21306,7 @@ ENDIF
 
 .BEGIN
 
- JSR BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
+\JSR BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
 
                         \ --- Mod: Code added for Teletext Elite: ------------->
 
@@ -21364,19 +21317,19 @@ ENDIF
 
                         \ --- End of added code ------------------------------->
 
- LDX #(CATF-COMC)       \ We start by zeroing all the configuration variables
+\LDX #(CATF-COMC)       \ We start by zeroing all the configuration variables
                         \ between COMC and CATF, to set them to their default
                         \ values, so set a counter in X for CATF - COMC bytes
 
- LDA #0                 \ Set A = 0 so we can zero the variables
+\LDA #0                 \ Set A = 0 so we can zero the variables
 
 .BEL1
 
- STA COMC,X             \ Zero the X-th configuration variable
+\STA COMC,X             \ Zero the X-th configuration variable
 
- DEX                    \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 
- BPL BEL1               \ Loop back to BEL1 to zero the next byte, until we have
+\BPL BEL1               \ Loop back to BEL1 to zero the next byte, until we have
                         \ zeroed them all
 
                         \ Fall through into TT170 to start the game
@@ -21423,8 +21376,8 @@ ENDIF
 
 .BR1
 
- LDX #3                 \ Set XC = 3 (set text cursor to column 3)
- STX XC
+\LDX #3                 \ Set XC = 3 (set text cursor to column 3)
+\STX XC
 
  JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
                         \ key is pressed (*FX 200,3)
@@ -21434,19 +21387,7 @@ ENDIF
  JSR TITLE              \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
                         \ internal number of the key pressed in A
 
- CMP #&44               \ Did we press "Y"? If not, jump to QU5, otherwise
- BNE QU5                \ continue on to load a new commander
-
- JSR DFAULT             \ Call DFAULT to reset the current commander data block
-                        \ to the last saved commander
-
- JSR SVE                \ Call SVE to load a new commander into the last saved
-                        \ commander data block
-
 .QU5
-
- JSR DFAULT             \ Call DFAULT to reset the current commander data block
-                        \ to the last saved commander
 
 \ ******************************************************************************
 \
@@ -21461,9 +21402,6 @@ ENDIF
 \ BRKV is set to point to BR1 by the loading process.
 \
 \ ******************************************************************************
-
- JSR msblob             \ Reset the dashboard's missile indicators so none of
-                        \ them are targeted
 
  LDA #7                 \ Call TITLE to show a rotating Krait (#KRA) and token
  LDX #KRA               \ 7 ("PRESS SPACE OR FIRE,{single cap}COMMANDER.{cr}
@@ -21613,20 +21551,11 @@ ENDIF
 \       Name: TITLE
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Display a title screen with a rotating ship and prompt
-\
-\ ------------------------------------------------------------------------------
-\
-\ Display the title screen, with a rotating ship and a text token at the bottom
-\ of the screen.
+\    Summary: Display a title screen with a rotating ship
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
-\
-\   A                   The number of the recursive token to show below the
-\                       rotating ship (see variable QQ18 for details of
-\                       recursive tokens)
 \
 \   X                   The type of the ship to show (see variable XX21 for a
 \                       list of ship types)
@@ -21642,36 +21571,38 @@ ENDIF
 
 .TITLE
 
- PHA                    \ Store the token number on the stack for later
+\PHA                    \ Store the token number on the stack for later
 
  STX TYPE               \ Store the ship type in location TYPE
 
  JSR RESET              \ Reset our ship so we can use it for the rotating
                         \ title ship
 
- LDA #1                 \ Clear the top part of the screen, draw a white border,
- JSR TT66               \ and set the current view type in QQ11 to 1
+\LDA #1                 \ Clear the top part of the screen, draw a white border,
+\JSR TT66               \ and set the current view type in QQ11 to 1
+
+ JSR ClearMode7Screen   \ Clear the screen
 
  JSR SetMode7Graphics   \ Set all screen rows to white graphics
 
- DEC QQ11               \ Decrement QQ11 to 0, so from here on we are using a
+\DEC QQ11               \ Decrement QQ11 to 0, so from here on we are using a
                         \ space view
 
  LDA #96                \ Set nosev_z hi = 96 (96 is the value of unity in the
  STA INWK+14            \ rotation vector)
 
- LDA &9F                \ As part of the copy protection, location &9F is set to
- CMP #219               \ 219 in the OSBmod routine in elite-loader3.asm. This
- BEQ tiwe               \ jumps to tiwe if the value is unchanged, otherwise it
+\LDA &9F                \ As part of the copy protection, location &9F is set to
+\CMP #219               \ 219 in the OSBmod routine in elite-loader3.asm. This
+\BEQ tiwe               \ jumps to tiwe if the value is unchanged, otherwise it
                         \ crashes the game with the following (as presumably
                         \ the game code has been tampered with)
 
- LDA #&10               \ Modify the STA DELTA instruction in RES2 to &10 &FE,
- STA modify+2           \ which is a BPL P%-2 instruction, to create an infinite
- LDA #&FE               \ loop and hang the game
- STA modify+3
+\LDA #&10               \ Modify the STA DELTA instruction in RES2 to &10 &FE,
+\STA modify+2           \ which is a BPL P%-2 instruction, to create an infinite
+\LDA #&FE               \ loop and hang the game
+\STA modify+3
 
-.tiwe
+\.tiwe
 
  STA INWK+7             \ Set z_hi, the high byte of the ship's z-coordinate,
                         \ to 96, which is the distance at which the rotating
@@ -21683,12 +21614,22 @@ ENDIF
  STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch and
                         \ set the pitch direction to dive
 
- INX                    \ Set QQ17 to 128 (so bit 7 is set) to switch to
- STX QQ17               \ Sentence Case, with the next letter printing in upper
+\INX                    \ Set QQ17 to 128 (so bit 7 is set) to switch to
+\STX QQ17               \ Sentence Case, with the next letter printing in upper
                         \ case
 
  LDA TYPE               \ Set up a new ship, using the ship type in TYPE
  JSR NWSHP
+
+ LDA #LO(MODE7_VRAM+MODE7_INDENT+9)      \ Print the title text
+ STA SC
+ LDA #HI(MODE7_VRAM+MODE7_INDENT+9)
+ STA SC+1
+ LDA #LO(titleText)
+ STA P
+ LDA #HI(titleText)
+ STA P+1
+ JSR PrintZeroString
 
                         \ --- Mod: Code removed for Teletext Elite: ----------->
 
@@ -21703,114 +21644,64 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #7                 \ Move the text cursor to column 7
- STY XC
+\LDY #7                 \ Move the text cursor to column 7
+\STY XC
 
- LDA #30                \ Print recursive token 144 ("---- E L I T E ----")
- JSR plf                \ followed by a newline
+\LDA #30                \ Print recursive token 144 ("---- E L I T E ----")
+\JSR plf                \ followed by a newline
 
- LDY #7                 \ Move the text cursor to column 7 again
- STY XC
+\LDY #7                 \ Move the text cursor to column 7 again
+\STY XC
 
                         \ --- End of replacement ------------------------------>
 
- INC YC                 \ Move the text cursor down a row
+\INC YC                 \ Move the text cursor down a row
 
- LDA PATG               \ If PATG = 0, skip the following two lines, which
- BEQ awe                \ print the author credits (PATG can be toggled by
+\LDA PATG               \ If PATG = 0, skip the following two lines, which
+\BEQ awe                \ print the author credits (PATG can be toggled by
                         \ pausing the game and pressing "X")
 
                         \ --- Mod: Code added for Teletext Elite: ------------->
 
- LDY #19                \ Move the text cursor to row 19
- STY YC
+\LDY #19                \ Move the text cursor to row 19
+\STY YC
 
- LDY #6                 \ Move the text cursor to column 6
- STY XC
+\LDY #6                 \ Move the text cursor to column 6
+\STY XC
 
- LDA #135               \ Style row 19 as white text
- STA MODE7_VRAM+(19*&28)
+\LDA #135               \ Style row 19 as white text
+\STA MODE7_VRAM+(19*&28)
 
                         \ --- End of added code ------------------------------->
 
- LDA #13                \ Print extended token 13 ("BY D.BRABEN & I.BELL")
- JSR DETOK
+\LDA #13                \ Print extended token 13 ("BY D.BRABEN & I.BELL")
+\JSR DETOK
 
-.awe
+\.awe
 
- LDA brkd               \ If brkd = 0, jump to BRBR2 to skip the following, as
- BEQ BRBR2              \ we do not have a system error message to display
+\.BRBR2
 
- INC brkd               \ Increment the brkd counter
-
-                        \ --- Mod: Code removed for Teletext Elite: ----------->
-
-\LDA #7                 \ Move the text cursor to column 7
-\STA XC
-\
-\LDA #10                \ Move the text cursor to row 10
-\STA YC
-
-                        \ --- And replaced by: -------------------------------->
-
- LDA #3                 \ Move the text cursor to column 3
- STA XC
-
- LDA #19                \ Move the text cursor to row 19
- STA YC
-
- LDA #129               \ Override the first character on row 18 with a red text
- STA &7EF8              \ control character, as otherwise error messages will
-                        \ appear as graphics characters
-                        \
-                        \ This also stops a line feed being printed as the first
-                        \ character in the loop below
-
-                        \ --- End of replacement ------------------------------>
-
-                        \ The following loop prints out the null-terminated
-                        \ message pointed to by (&FD &FE), which is the MOS
-                        \ error message pointer - so this prints the error
-                        \ message on the next line
-
- LDY #0                 \ Set Y = 0 to act as a character counter
-
- JSR OSWRCH             \ Print the character in A (which contains a line feed
-                        \ on the first loop iteration), and then any non-zero
-                        \ characters we fetch from the error message
-
- INY                    \ Increment the loop counter
-
- LDA (&FD),Y            \ Fetch the Y-th byte of the block pointed to by
-                        \ (&FD &FE), so that's the Y-th character of the message
-                        \ pointed to by the MOS error message pointer
-
- BNE P%-6               \ If the fetched character is non-zero, loop back to the
-                        \ JSR OSWRCH above to print it, and keep looping until
-                        \ we fetch a zero (which marks the end of the message)
-
-.BRBR2
-
- JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
+\JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
                         \ and move the text cursor to column 1 on row 21, i.e.
                         \ the start of the top row of the three bottom rows.
                         \ It also returns with Y = 0
 
- STY DELTA              \ Set DELTA = 0 (i.e. ship speed = 0)
+ LDY #0                 \ Set DELTA = 0 (i.e. ship speed = 0)
+ STY DELTA
 
- STY JSTK               \ Set JSTK = 0 (i.e. keyboard, not joystick)
+\STY JSTK               \ Set JSTK = 0 (i.e. keyboard, not joystick)
 
- PLA                    \ Restore the recursive token number we stored on the
+\PLA                    \ Restore the recursive token number we stored on the
                         \ stack at the start of this subroutine
 
- JSR DETOK              \ Print the extended token in A
+\JSR DETOK              \ Print the extended token in A
 
- LDA #12                \ Set A to extended token 12
+\LDA #12                \ Set A to extended token 12
 
- LDX #7                 \ Move the text cursor to column 7
- STX XC
+\LDX #7                 \ Move the text cursor to column 7
+\STX XC
 
- JSR DETOK              \ Print extended token 12 ("({single cap}C) ACORNSOFT
+\JSR DETOK              \ Print extended token 12 ("({single cap}C) ACORNSOFT
                         \ 1984")
 
 .TLL2
@@ -21840,13 +21731,13 @@ ENDIF
 
  DEC MCNT               \ Decrement the main loop counter
 
- LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
+\LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 
- AND #%00010000         \ Bit 4 of IRB (PB4) is clear if joystick 1's fire
+\AND #%00010000         \ Bit 4 of IRB (PB4) is clear if joystick 1's fire
                         \ button is pressed, otherwise it is set, so AND'ing
                         \ the value of IRB with %10000 extracts this bit
 
- BEQ TL2                \ If the joystick fire button is pressed, jump to TL2
+\BEQ TL2                \ If the joystick fire button is pressed, jump to TL2
 
  JSR RDKEY              \ Scan the keyboard for a key press
 
@@ -21855,13 +21746,13 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
-.TL2
+\.TL2
 
- DEC JSTK               \ Joystick fire button was pressed, so set JSTK to &FF
+\DEC JSTK               \ Joystick fire button was pressed, so set JSTK to &FF
                         \ (it was set to 0 above), to disable keyboard and
                         \ enable joysticks
 
- RTS                    \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -25473,15 +25364,15 @@ ENDMACRO
                         \ longer on-screen, is too far away to be fully drawn,
                         \ and so on
 
- LDA XX1+31             \ If bit 5 of the ship's byte #31 is clear, then the
- AND #%00100000         \ ship is not currently exploding, so jump down to EE51
- BEQ EE51               \ to redraw its wireframe
+\LDA XX1+31             \ If bit 5 of the ship's byte #31 is clear, then the
+\AND #%00100000         \ ship is not currently exploding, so jump down to EE51
+\BEQ EE51               \ to redraw its wireframe
 
- LDA XX1+31             \ The ship is exploding, so clear bit 3 of the ship's
- AND #%11110111         \ byte #31 to denote that the ship is no longer being
- STA XX1+31             \ drawn on-screen
+\LDA XX1+31             \ The ship is exploding, so clear bit 3 of the ship's
+\AND #%11110111         \ byte #31 to denote that the ship is no longer being
+\STA XX1+31             \ drawn on-screen
 
- JMP DOEXP              \ Jump to DOEXP to return from the subroutine using a
+\JMP DOEXP              \ Jump to DOEXP to return from the subroutine using a
                         \ tail call, as in the docked code DOEXP just contains
                         \ an RTS
 
@@ -33377,6 +33268,58 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: PrintZeroString
+\       Type: Subroutine
+\   Category: Teletext Elite
+\    Summary: Print a null-terminated string
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Teletext Elite: ------------->
+
+.PrintZeroString
+
+ LDY #0                 \ Sey Y = 0 to act as an index into the string
+
+.pzer1
+
+ LDA (P),Y              \ Copy the Y-th byte of the message from P(1 0)
+
+ BEQ pzer2              \ If it is zero, jump to pzer2 to return from the
+                        \ subroutine
+
+ STA (SC),Y             \ Poke the byte into screen memory in SC(1 0)
+
+ INY                    \ Increment the index
+
+ BPL pzer1              \ Loop back to print the next character
+
+.pzer2
+
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
+\       Name: titleText
+\       Type: Variable
+\   Category: Teletext Elite
+\    Summary: Loading screen title
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Teletext Elite: ------------->
+
+.titleText
+
+ EQUS "ELITE OVER ECONET"
+ EQUB 0
+
+                        \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
 \ Save ELTH.bin
 \
 \ ******************************************************************************
@@ -34542,10 +34485,10 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\ Save T.CODE.unprot.bin
+\ Save MENU2.bin
 \
 \ ******************************************************************************
 
- PRINT "S.T.CODE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
- SAVE "3-assembled-output/T.CODE.unprot.bin", CODE%, P%
+ PRINT "S.MENU2 ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
+ SAVE "3-assembled-output/MENU2.bin", CODE%, P%
 
