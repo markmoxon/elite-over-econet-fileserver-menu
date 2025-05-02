@@ -8,7 +8,7 @@ folder=menu
 all:
 	echo _VERSION=2 > 1-source-files/main-sources/elite-build-options.asm
 	echo _VARIANT=$(variant-number) >> 1-source-files/main-sources/elite-build-options.asm
-	$(BEEBASM) -i 1-source-files/main-sources/elite-loader.asm -v >> 3-assembled-output/compile.txt
+	$(BEEBASM) -i 1-source-files/main-sources/elite-loader.asm -v > 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-menu.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do server-menu.ssd -boot MENU -title "E L I T E"
 ifneq ($(verify), no)

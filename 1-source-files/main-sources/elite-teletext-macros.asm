@@ -81,3 +81,26 @@ MACRO SCALE_SIXEL_Y
                         \ draw pixels on the title row
 
 ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: TEXT_AT
+\       Type: Macro
+\   Category: Teletext Elite
+\    Summary: Print a null-terminated text string at (x, y)
+\
+\ ******************************************************************************
+
+MACRO TEXT_AT x, y, textAddr
+
+ LDA #LO(MODE7_VRAM+(y*&28)+x)
+ STA SC
+ LDA #HI(MODE7_VRAM+(y*&28)+x)
+ STA SC+1
+ LDA #LO(textAddr)
+ STA P
+ LDA #HI(textAddr)
+ STA P+1
+ JSR PrintZeroString
+
+ENDMACRO
