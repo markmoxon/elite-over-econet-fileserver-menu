@@ -3068,10 +3068,7 @@
 
 .RESET
 
- JSR ZERO               \ Zero-fill pages &9, &A, &B, &C and &D, which clears
-                        \ the ship data blocks, the ship line heap, the ship
-                        \ slots for the local bubble of universe, and various
-                        \ flight and ship status variables
+ JSR ZERO               \ Reset the ship slots
 
  LDX #6                 \ Set up a counter for zeroing BETA through BETA+6
 
@@ -3127,10 +3124,7 @@
 
  STA ALP1               \ Reset ALP1 (magnitude of roll angle alpha) to 3
 
- JSR ZERO               \ Zero-fill pages &9, &A, &B, &C and &D, which clears
-                        \ the ship data blocks, the ship line heap, the ship
-                        \ slots for the local bubble of universe, and various
-                        \ flight and ship status variables
+ JSR ZERO               \ Reset the ship slots
 
  LDA #LO(LS%)           \ We have reset the ship line heap, so we now point
  STA SLSP               \ SLSP to LS% (the byte below the ship blueprints at D%)
@@ -3308,19 +3302,71 @@
  JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
                         \ key is pressed (*FX 200,3)
 
- LDX #CYL               \ Call TITLE to show a rotating Cobra Mk III (#CYL) and
- LDA #6                 \ token 6 ("LOAD NEW {single cap}COMMANDER {all caps}
- JSR TITLE              \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
-                        \ internal number of the key pressed in A
+ LDX #CYL               \ Set TYPE to show a rotating Cobra Mk III (#CYL) in the
+ STX TYPE               \ call to TITLE
+
+ JSR ClearMode7Screen   \ Clear the screen
+
+ JSR SetMode7Graphics   \ Set all screen rows to white graphics
+
+ TEXT_AT 12, 0, titleText
+ TEXT_AT 0, 17, menu1
+ TEXT_AT 0, 18, menu2
+ TEXT_AT 0, 19, menu3
+ TEXT_AT 0, 20, menu4
+ TEXT_AT 0, 21, menu5
+ TEXT_AT 0, 22, menu6
+ TEXT_AT 0, 23, menu7
+ TEXT_AT 0, 24, menu8
+
+ JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
+                        \ with the internal number of the key pressed in A
 
                         \ DO STUFF HERE
 
- LDA #7                 \ Call TITLE to show a rotating Krait (#KRA) and token
- LDX #KRA               \ 7 ("PRESS SPACE OR FIRE,{single cap}COMMANDER.{cr}
- JSR TITLE              \ {cr}"), returning with the internal number of the key
-                        \ pressed in A
+ LDX #KRA               \ Set TYPE to show a rotating Krait (#KRA) in the
+ STX TYPE               \ call to TITLE
+
+ JSR ClearMode7Screen   \ Clear the screen
+
+ JSR SetMode7Graphics   \ Set all screen rows to white graphics
+
+ JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
+                        \ with the internal number of the key pressed in A
 
  RTS                    \ DO STUFF HERE
+
+.menu1
+
+ EQUB 131, "1.",134,"Play flicker-free Elite over Econet", 0
+
+.menu2
+
+ EQUB 131, "2.",134,"Play original Elite over Econet", 0
+
+.menu3
+
+ EQUB 131, "3.",134,"Play Executive Elite over Econet", 0
+
+.menu4
+
+ EQUB 131, "4.",134,"Play Archimedes Elite over Econet", 0
+
+.menu5
+
+ EQUB 131, "5.",134,"Run the Elite over Econet Scoreboard", 0
+
+.menu6
+
+ EQUB 131, "6.",134,"Run the Elite over Econet Debugger", 0
+
+.menu7
+
+ EQUB 131, "7.",134,"Show version information", 0
+
+.menu8
+
+ EQUB 131, "8.",134,"About Elite over Econet", 0
 
 \ ******************************************************************************
 \
@@ -3347,14 +3393,8 @@
 
 .TITLE
 
- STX TYPE               \ Store the ship type in location TYPE
-
  JSR RESET              \ Reset our ship so we can use it for the rotating
                         \ title ship
-
- JSR ClearMode7Screen   \ Clear the screen
-
- JSR SetMode7Graphics   \ Set all screen rows to white graphics
 
  LDA #96                \ Set nosev_z hi = 96 (96 is the value of unity in the
  STA INWK+14            \ rotation vector)
@@ -3371,16 +3411,6 @@
 
  LDA TYPE               \ Set up a new ship, using the ship type in TYPE
  JSR NWSHP
-
- LDA #LO(MODE7_VRAM+MODE7_INDENT+9)      \ Print the title text
- STA SC
- LDA #HI(MODE7_VRAM+MODE7_INDENT+9)
- STA SC+1
- LDA #LO(titleText)
- STA P
- LDA #HI(titleText)
- STA P+1
- JSR PrintZeroString
 
  LDY #0                 \ Set DELTA = 0 (i.e. ship speed = 0)
  STY DELTA
