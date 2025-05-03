@@ -43,7 +43,7 @@
  MODE7_LOW_Y = 3        \ The first sixel y-coordinate we can draw sixels in (so
                         \ we not draw on the first character row)
 
- MODE7_HIGH_Y = 3*25    \ The last sixel y-coordinate we can draw sixels in + 1
+\MODE7_HIGH_Y = 3*25    \ The last sixel y-coordinate we can draw sixels in + 1
 
  MESSAGE_ROW = 17       \ The character row containing the in-flight message bar
 

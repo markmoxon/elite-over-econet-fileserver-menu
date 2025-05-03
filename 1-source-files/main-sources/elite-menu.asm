@@ -3279,14 +3279,11 @@
  JSR SetMode7Graphics   \ Set all screen rows to white graphics
 
  TEXT_AT 12, 0, titleText
- TEXT_AT 0, 17, menu1
- TEXT_AT 0, 18, menu2
- TEXT_AT 0, 19, menu3
- TEXT_AT 0, 20, menu4
- TEXT_AT 0, 21, menu5
- TEXT_AT 0, 22, menu6
- TEXT_AT 0, 23, menu7
- TEXT_AT 0, 24, menu8
+ TEXT_AT 0, 16, menuKey
+ TEXT_AT 0, 18, menu1
+ TEXT_AT 0, 20, menu2
+ TEXT_AT 0, 22, menu3
+ TEXT_AT 0, 24, menu4
 
  JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
                         \ with the internal number of the key pressed in A
@@ -3305,37 +3302,48 @@
 
  RTS                    \ DO STUFF HERE
 
+\ 156 = black background
+\ x, 157 = new background x
+\ 129 = red, 131 = yellow, 132 = blue, 134 = cyan
+
+\ Highlight an entry by setting first two bytes to 131, "]"
+\ Restore an entry by setting first two bytes to 134, " "
+
+.menuKey
+
+ EQUS 132, 157, 131, " Select with [^], RETURN for info", 0
+
 .menu1
 
- EQUB 131, "1.",134,"Play flicker-free Elite over Econet", 0
+ EQUS 131, "]", "Flicker-free Elite"
+
+.menu1a
+
+ EQUS 134, " ", "Econet scoreboard", 0
 
 .menu2
 
- EQUB 131, "2.",134,"Play original Elite over Econet", 0
+ EQUS 134, " ", "Original Elite    "
+
+.menu2a
+
+ EQUS 134, " ", "Econet debugger", 0
 
 .menu3
 
- EQUB 131, "3.",134,"Play Executive Elite over Econet", 0
+ EQUS 134, " ", "Executive Elite   "
+
+.menu3a
+
+ EQUS 134, " ", "Version info", 0
 
 .menu4
 
- EQUB 131, "4.",134,"Play Archimedes Elite over Econet", 0
+ EQUS 134, " ", "Archimedes Elite  "
 
-.menu5
+.menu4a
 
- EQUB 131, "5.",134,"Run the Elite over Econet Scoreboard", 0
-
-.menu6
-
- EQUB 131, "6.",134,"Run the Elite over Econet Debugger", 0
-
-.menu7
-
- EQUB 131, "7.",134,"Show version information", 0
-
-.menu8
-
- EQUB 131, "8.",134,"About Elite over Econet", 0
+ EQUS 134, " ", "About Econet Elite", 0
 
 \ ******************************************************************************
 \
@@ -3405,7 +3413,8 @@
 
  STA INWK               \ Set x_lo = 0, so the ship remains in the screen centre
 
- STA INWK+3             \ Set y_lo = 0, so the ship remains in the screen centre
+ LDA #10                \ Set y_lo = 10, so the ship remains slightly above the
+ STA INWK+3             \ screen centre
 
  JSR LL9                \ Call LL9 to display the ship
 
@@ -9101,6 +9110,9 @@ ENDMACRO
  FACE       44,       75,        0,         31    \ Face 7
  FACE        0,        0,     -160,         31    \ Face 8
  FACE        0,      -27,        0,         31    \ Face 9
+
+ MODE7_HIGH_Y = 3*16    \ The last sixel y-coordinate we can draw sixels in + 1
+                        \ (so row 16 is safe)
 
  INCLUDE "1-source-files/main-sources/elite-teletext-sixels.asm"
 

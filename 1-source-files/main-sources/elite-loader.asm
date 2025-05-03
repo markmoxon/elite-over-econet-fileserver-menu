@@ -869,6 +869,9 @@
  JMP OSBYTE             \ using a tail call (so we can call OSB to call OSBYTE
                         \ for when we know we want Y set to 0)
 
+ MODE7_HIGH_Y = 3*25    \ The last sixel y-coordinate we can draw sixels in + 1
+                        \ (so we can draw on the whole screen)
+
  INCLUDE "1-source-files/main-sources/elite-teletext-sixels.asm"
 
 \ ******************************************************************************
