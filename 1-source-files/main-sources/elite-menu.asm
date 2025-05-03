@@ -3253,54 +3253,23 @@
 \       Name: BEGIN
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Initialise the configuration variables and start the game
+\    Summary: Show the menu
 \
 \ ******************************************************************************
 
 .BEGIN
 
- JSR ClearMode7Screen   \ Clear the screen
-
- LDA #144+7             \ Set all screen rows to white graphics
- JSR SetMode7Graphics
-
-                        \ Fall through into TT170 to start the game
-
-\ ******************************************************************************
-\
-\       Name: TT170
-\       Type: Subroutine
-\   Category: Start and end
-\    Summary: Main entry point for the Elite game code
-\  Deep dive: Program flow of the main game loop
-\
-\ ------------------------------------------------------------------------------
-\
-\ This is the main entry point for the main game code.
-\
-\ ******************************************************************************
-
-.TT170
-
  LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
-                        \ Fall through into BR1 to start the game
-
-\ ******************************************************************************
-\
-\       Name: BR1
-\       Type: Subroutine
-\   Category: Start and end
-\    Summary: Show the menu
-\
-\ ******************************************************************************
-
-.BR1
-
  JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
                         \ key is pressed (*FX 200,3)
+
+ LDA #4                 \ Call OSBYTE with A = 4, X = 1 and Y = 0 to disable
+ LDX #1                 \ cursor editing, so the cursor keys return ASCII values
+ LDY #0                 \ and can therefore be used in-game
+ JSR OSBYTE
 
  LDX #CYL               \ Set TYPE to show a rotating Cobra Mk III (#CYL) in the
  STX TYPE               \ call to TITLE

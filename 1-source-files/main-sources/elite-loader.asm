@@ -32,15 +32,11 @@
 
  GUARD &6000            \ Guard against assembling over screen memory
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
  _DOCKED = TRUE         \ Set compilation flag for docked vs flight code
 
  _LOADER = TRUE         \ Set compilation flag for loader code
 
  INCLUDE "1-source-files/main-sources/elite-teletext-macros.asm"
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -143,11 +139,10 @@
 
 \ ******************************************************************************
 \
-\       Name: Elite loader (Part 1 of 3)
+\       Name: Elite loader
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Set up the split screen mode, move code around, set up the sound
-\             envelopes and configure the system
+\    Summary: Set up mode 7, draw Saturn and run the second menu program
 \
 \ ******************************************************************************
 
@@ -178,30 +173,6 @@
  BNE loop1              \ all (the number of bytes was set in N% above)
 
  JSR DrawSaturn         \ Call DrawSaturn to draw a mode 7 Saturn
-
- LDA #200               \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
- LDX #0                 \ the ESCAPE key and disable memory clearing if the
- JSR OSB                \ BREAK key is pressed
-
- LDA #13                \ Call OSBYTE with A = 13, X = 0 and Y = 0 to disable
- LDX #0                 \ the "output buffer empty" event
- JSR OSB
-
- LDA #225               \ Call OSBYTE with A = 225, X = 128 and Y = 0 to set
- LDX #128               \ the function keys to return ASCII codes for SHIFT-fn
- JSR OSB                \ keys (i.e. add 128)
-
- LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
- LDX #2                 \ the "character entering buffer" event
- JSR OSB
-
- LDA #4                 \ Call OSBYTE with A = 4, X = 1 and Y = 0 to disable
- LDX #1                 \ cursor editing, so the cursor keys return ASCII values
- JSR OSB                \ and can therefore be used in-game
-
- LDA #9                 \ Call OSBYTE with A = 9, X = 0 and Y = 0 to disable
- LDX #0                 \ flashing colours
- JSR OSB
 
  LDA VIA+&44            \ Read the 6522 System VIA T1C-L timer 1 low-order
  STA &0001              \ counter (SHEILA &44), which decrements one million
@@ -909,8 +880,6 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
 .DrawSaturn
 
  LDA #132               \ Style the top and bottom rows as yellow text on a blue
@@ -954,8 +923,6 @@
  JMP PLL1               \ Draw Saturn, returning from the subroutine using a
                         \ tail call
 
-                        \ --- End of added code ------------------------------->
-
 \ ******************************************************************************
 \
 \       Name: PrintZeroString
@@ -995,14 +962,10 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
 .text1
 
  EQUS "Elite Over Econet"
  EQUB 0
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -1013,14 +976,10 @@
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Teletext Elite: ------------->
-
 .text2
 
  EQUS "On the TNMoC Econet Cloud"
  EQUB 0
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
