@@ -3252,7 +3252,7 @@
 \
 \       Name: BEGIN
 \       Type: Subroutine
-\   Category: Loader
+\   Category: Server menu
 \    Summary: Show the menu
 \
 \ ******************************************************************************
@@ -3278,12 +3278,16 @@
 
  JSR SetMode7Graphics   \ Set all screen rows to white graphics
 
- TEXT_AT 12, 0, titleText
- TEXT_AT 0, 16, menuKey
+ TEXT_AT 12, 0, titleText   \ Display the title
+
+ TEXT_AT 0, 16, menuKey \ Display the menu
  TEXT_AT 0, 18, menu1
  TEXT_AT 0, 20, menu2
  TEXT_AT 0, 22, menu3
  TEXT_AT 0, 24, menu4
+
+ LDY selection          \ Highlight the currently selected menu item
+ JSR AddHighlight
 
  JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
                         \ with the internal number of the key pressed in A
@@ -3302,12 +3306,176 @@
 
  RTS                    \ DO STUFF HERE
 
+\ ******************************************************************************
+\
+\       Name: AddHighlight
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Add a highlight to a menu item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The number of the menu item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   Y                   Y is preserved
+\
+\ ******************************************************************************
+
+.AddHighlight
+
+ PHA                    \ Store A on the stack
+
+ TYA                    \ Store the number of the menu item on the stack
+ PHA
+
+ ASL A                  \ Set A = Y * 2 so we can use it as an index into the
+ TAY                    \ address table at highlightAddr
+
+ LDA highlightAddr,Y    \ Set SC(1 0) to the highlightAddr entry for the menu
+ STA SC                 \ item, which contains the screen address of the item's
+ LDA highlightAddr+1,Y  \ highlight characters
+ STA SC+1
+
+ LDY #0                 \ Set the characters to 131, "]" to highlight the item
+ LDA #131
+ STA (SC),Y
+ LDA #']'
+ INY
+ STA (SC),Y
+
+ PLA                    \ Restore the number of the menu item in Y
+ TAY
+
+ PLA                    \ Restore A from the stack
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: RemoveHighlight
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Remove the highlight from a menu item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The number of the menu item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   Y                   Y is preserved
+\
+\ ******************************************************************************
+
+.RemoveHighlight
+
+ PHA                    \ Store A on the stack
+
+ TYA                    \ Store the number of the menu item on the stack
+ PHA
+
+ ASL A                  \ Set A = Y * 2 so we can use it as an index into the
+ TAY                    \ address table at highlightAddr
+
+ LDA highlightAddr,Y    \ Set SC(1 0) to the highlightAddr entry for the menu
+ STA SC                 \ item, which contains the screen address of the item's
+ LDA highlightAddr+1,Y  \ highlight characters
+ STA SC+1
+
+ LDY #0                 \ Set the characters to 134, " " to clear the item
+ LDA #134
+ STA (SC),Y
+ LDA #' '
+ INY
+ STA (SC),Y
+
+ PLA                    \ Restore the number of the menu item in Y
+ TAY
+
+ PLA                    \ Restore A from the stack
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: highlightAddr
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The address of the highlight characters for each of the eight menu
+\             items in the main menu
+\
+\ ******************************************************************************
+
+.highlightAddr
+
+ EQUW MODE7_VRAM+(18*&28)+0
+ EQUW MODE7_VRAM+(20*&28)+0
+ EQUW MODE7_VRAM+(22*&28)+0
+ EQUW MODE7_VRAM+(24*&28)+0
+ EQUW MODE7_VRAM+(18*&28)+20
+ EQUW MODE7_VRAM+(20*&28)+20
+ EQUW MODE7_VRAM+(22*&28)+20
+ EQUW MODE7_VRAM+(24*&28)+20
+
+\ ******************************************************************************
+\
+\       Name: selection
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The number of the currently selected menu item (0 to 7, counting
+\             from top-left and down, then top-right and down)
+\
+\ ******************************************************************************
+
+.selection
+
+ EQUB 0                 \ The currently selected menu item
+
+\ ******************************************************************************
+\
+\       Name: debounce
+\       Type: Variable
+\   Category: Server menu
+\    Summary: A variable to track whether a key press has been released
+\
+\ ******************************************************************************
+
+.debounce
+
+ EQUB 0                 \ The currently pressed key
+
+\ ******************************************************************************
+\
+\       Name: Menu text
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The text of the main menu
+\
+\ ------------------------------------------------------------------------------
+\
 \ 156 = black background
 \ x, 157 = new background x
 \ 129 = red, 131 = yellow, 132 = blue, 134 = cyan
-
-\ Highlight an entry by setting first two bytes to 131, "]"
-\ Restore an entry by setting first two bytes to 134, " "
+\
+\ Highlight an entry by setting the first two bytes to 131, "]"
+\
+\ Restore an entry by setting the first two bytes to 134, " "
+\
+\ ******************************************************************************
 
 .menuKey
 
@@ -3315,7 +3483,7 @@
 
 .menu1
 
- EQUS 131, "]", "Flicker-free Elite"
+ EQUS 134, " ", "Flicker-free Elite"
 
 .menu1a
 
@@ -3350,7 +3518,7 @@
 \       Name: TITLE
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Display a title screen with a rotating ship
+\    Summary: Display a menu screen with a rotating ship
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3358,13 +3526,6 @@
 \
 \   X                   The type of the ship to show (see variable XX21 for a
 \                       list of ship types)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Returns:
-\
-\   X                   If a key is being pressed, X contains the internal key
-\                       number, otherwise it contains 0
 \
 \ ******************************************************************************
 
@@ -3422,8 +3583,164 @@
 
  JSR RDKEY              \ Scan the keyboard for a key press
 
- BEQ TLL2               \ If no key was pressed, loop back up to move/rotate
+ BNE tite1              \ If a key is being pressed, jump to tite1 to process it
+
+ STA debounce           \ No key is being pressed and A = 0, so zero debounce so
+                        \ we detect key presses once more
+
+ BEQ TLL2               \ No key was pressed, so loop back up to move/rotate
                         \ the ship and check again for a key press
+
+.tite1
+
+ CMP debounce           \ If the key press is still the same key being held down
+ BEQ TLL2               \ from last time, ignore it and loop back to keep moving
+                        \ the ship
+
+                        \ Otherwise this is not the same key being held down, so
+                        \ process it
+
+ CMP #&29               \ If the down arrow is not being pressed, jump to tite4
+ BNE tite4              \ to move on to the next key press
+
+                        \ If we get here then the down arrow is being pressed
+
+ LDY selection          \ Set Y to the number of the currently selected item
+
+ JSR RemoveHighlight    \ Remove the highlight from the currently selected item
+
+ INY                    \ Increment Y to move down to the next menu item
+
+ CPY #4                 \ If Y = 4 then set Y = 0 so we wrap around the left
+ BNE tite2              \ column
+ LDY #0
+
+ BEQ tite3              \ Skip the following (this BNE is effectively a JMP as
+                        \ Y is always zero)
+
+.tite2
+
+ CPY #8                 \ If Y = 8 then set Y = 4 so we wrap around the right
+ BNE tite3              \ column
+ LDY #4
+
+.tite3
+
+ STY selection          \ Update the number of the currently selected item
+
+ JSR AddHighlight       \ Highlight the newly selected item
+
+ JMP tite9              \ Jump down to tite9 to wait for the key press to be
+                        \ lifted and keep going
+
+.tite4
+
+ CMP #&39               \ If the up arrow is not being pressed, jump to tite7
+ BNE tite7              \ to move on to the next key press
+
+                        \ If we get here then the up arrow is being pressed
+
+ LDY selection          \ Set Y to the number of the currently selected item
+
+ JSR RemoveHighlight    \ Remove the highlight from the currently selected item
+
+ DEY                    \ Decrement Y to move up to the previous menu item
+
+ CPY #&FF               \ If Y = -1 then set Y = 3 so we wrap around the left
+ BNE tite5              \ column
+ LDY #3
+
+ BNE tite6              \ Skip the following (this BNE is effectively a JMP as
+                        \ Y is never zero)
+
+.tite5
+
+ CPY #3                 \ If Y = 3 then set Y = 7 so we wrap around the right
+ BNE tite6              \ column
+ LDY #7
+
+.tite6
+
+ STY selection          \ Update the number of the currently selected item
+
+ JSR AddHighlight       \ Highlight the newly selected item
+
+ JMP tite9              \ Jump down to tite9 to wait for the key press to be
+                        \ lifted and keep going
+
+.tite7
+
+ CMP #&19               \ If the left arrow is being pressed, jump to tite8 to
+ BEQ tite8              \ process the key press
+
+ CMP #&79               \ If the right arrow is not being pressed, jump to tite9
+ BNE tite9              \ to move on to the next key press
+
+.tite8
+
+                        \ If we get here then either the left or right arrow is
+                        \ being pressed
+
+ LDY selection          \ Set Y to the number of the currently selected item
+
+ JSR RemoveHighlight    \ Remove the highlight from the currently selected item
+
+ PHA                    \ Store A on the stack so we can preserve it
+
+ TYA                    \ Set Y = Y + 4 mod 8
+ CLC                    \
+ ADC #4                 \ so the highlight moves to the other side
+ AND #7
+ TAY
+
+ PLA                    \ Restore A from the stack
+
+ STY selection          \ Update the number of the currently selected item
+
+ JSR AddHighlight       \ Highlight the newly selected item
+
+.tite9
+
+ STA debounce           \ Store the key press in debounce so we can ensure it
+                        \ is released before registering another key press
+
+ CMP #&49               \ If RETURN is being pressed, jump to tite20 to return     
+ BEQ tite10             \ from the subroutine
+
+ JMP TLL2               \ Loop back up to move/rotate the ship and check again
+                        \ for a key press
+
+.tite10
+
+                        \ We now move the ship away from us
+
+ LDA INWK+7             \ If z_hi (the ship's distance) is 96, jump to tite12
+ CMP #96                \ to return from the subroutine
+ BEQ tite12
+
+ INC INWK+7             \ Decrement the ship's distance, to move the ship away
+                        \ from us
+
+ JSR MVEIT              \ Move the ship in space according to the orientation
+                        \ vectors and the new value in z_hi
+
+ LDA #128               \ Set z_lo = 128, so the closest the ship gets to us is
+ STA INWK+6             \ z_hi = 1, z_lo = 128, or 256 + 128 = 384
+
+ ASL A                  \ Set A = 0
+
+ STA INWK               \ Set x_lo = 0, so the ship remains in the screen centre
+
+ LDA #10                \ Set y_lo = 10, so the ship remains slightly above the
+ STA INWK+3             \ screen centre
+
+ JSR LL9                \ Call LL9 to display the ship
+
+ DEC MCNT               \ Decrement the main loop counter
+
+ JMP tite10             \ Loop back up to move/rotate the ship
+
+.tite12
 
  RTS                    \ Return from the subroutine
 
