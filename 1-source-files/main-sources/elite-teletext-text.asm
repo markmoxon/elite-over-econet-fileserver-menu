@@ -226,3 +226,38 @@
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: ClearMenu
+\       Type: Subroutine
+\   Category: Teletext Elite
+\    Summary: Clear lines 16 to 24 in mode 7
+\
+\ ******************************************************************************
+
+.ClearMenu
+
+ LDA #0                 \ Set A = 0 so we can zero screen memory
+
+ LDX #1                 \ Set a byte counter in X, starting from 1 so we skip
+                        \ the graphics/text control character
+
+.clyn1
+
+ STA MODE7_VRAM+(16*40),X   \ Zero the X-th byte of rows 18 to 24
+ STA MODE7_VRAM+(17*40),X
+ STA MODE7_VRAM+(18*40),X
+ STA MODE7_VRAM+(19*40),X
+ STA MODE7_VRAM+(20*40),X
+ STA MODE7_VRAM+(21*40),X
+ STA MODE7_VRAM+(22*40),X
+ STA MODE7_VRAM+(23*40),X
+ STA MODE7_VRAM+(24*40),X
+
+ INX                    \ Increment the byte counter
+
+ CPX #40                \ Loop back until we have cleared the whole row
+ BCC clyn1
+
+ RTS                    \ Return from the subroutine
+

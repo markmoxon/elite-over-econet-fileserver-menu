@@ -903,9 +903,9 @@
  
  NEXT
 
- LDA #LO(MODE7_VRAM+MODE7_INDENT+9)      \ Print the title text
+ LDA #LO(MODE7_VRAM+MODE7_INDENT+5)      \ Print the title text
  STA ZP
- LDA #HI(MODE7_VRAM+MODE7_INDENT+9)
+ LDA #HI(MODE7_VRAM+MODE7_INDENT+5)
  STA ZP+1
  LDA #LO(text1)
  STA P
@@ -967,7 +967,7 @@
 
 .text1
 
- EQUS "Elite Over Econet"
+ EQUS "Loading Elite over Econet"
  EQUB 0
 
 \ ******************************************************************************

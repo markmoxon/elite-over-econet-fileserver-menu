@@ -3271,40 +3271,58 @@
  LDY #0                 \ and can therefore be used in-game
  JSR OSBYTE
 
- LDX #CYL               \ Set TYPE to show a rotating Cobra Mk III (#CYL) in the
- STX TYPE               \ call to TITLE
-
  JSR ClearMode7Screen   \ Clear the screen
 
  JSR SetMode7Graphics   \ Set all screen rows to white graphics
 
  TEXT_AT 12, 0, titleText   \ Display the title
 
- TEXT_AT 0, 16, menuKey \ Display the menu
- TEXT_AT 0, 18, menu1
- TEXT_AT 0, 20, menu2
- TEXT_AT 0, 22, menu3
- TEXT_AT 0, 24, menu4
+.begn1
+
+ JSR PrintMainMenu      \ Print the main menu
 
  LDY selection          \ Highlight the currently selected menu item
  JSR AddHighlight
 
- JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
-                        \ with the internal number of the key pressed in A
+ LDA #0                 \ Set the menu type to 0, for the main menu
+ STA menuType
 
-                        \ DO STUFF HERE
-
- LDX #KRA               \ Set TYPE to show a rotating Krait (#KRA) in the
+ LDX #CYL               \ Set TYPE to show a rotating Cobra Mk III (#CYL) in the
  STX TYPE               \ call to TITLE
 
- JSR ClearMode7Screen   \ Clear the screen
+ LDX #96                \ Set shipDistance = 96 for the Cobra
+ STX shipDistance
 
- JSR SetMode7Graphics   \ Set all screen rows to white graphics
+ JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III with the
+                        \ main menu
 
- JSR TITLE              \ Call TITLE to show a rotating Cobra Mk III returning
-                        \ with the internal number of the key pressed in A
+ JSR PrintInfo          \ Print the information for the selection
 
- RTS                    \ DO STUFF HERE
+ LDY selection          \ Set TYPE to the correct ship for this menu
+ LDA menuShip,Y
+ STA TYPE
+
+ LDA menuShip,Y         \ Set TYPE to the correct ship for this menu
+ STA shipDistance
+
+ LDA #1                 \ Set the menu type to 1, for the info menu
+ STA menuType
+
+ JSR TITLE              \ Call TITLE to show a rotating ship with the info for
+                        \ the selected item from the main menu
+
+ LDA menuType           \ If menuType has been changed back to zero, then we
+ BNE begn2              \ need to show the main menu, so jump to begn1 to do so
+ JMP begn1
+
+.begn2
+
+                        \ Otherwise we have chosen to run the selected menu
+                        \ item, so that's what we do now
+
+\ INSERT RUN CODE HERE
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3412,6 +3430,77 @@
 
 \ ******************************************************************************
 \
+\       Name: PrintMainMenu
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Print the main menu
+\
+\ ******************************************************************************
+
+.PrintMainMenu
+
+ TEXT_AT 0, 16, menuKey \ Display the menu key
+
+ TEXT_AT 0, 18, menu1   \ Display the menu
+ TEXT_AT 0, 20, menu2
+ TEXT_AT 0, 22, menu3
+ TEXT_AT 0, 24, menu4
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: PrintInfo
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Print the info text for the selected menu
+\
+\ ******************************************************************************
+
+.PrintInfo
+
+ TEXT_AT 0, 24, infoKey \ Display the info key
+
+ LDA selection          \ Set Y = selection * 2 so we can use it as an index
+ ASL A                  \ into the address table at infoAddr
+ TAY
+
+ LDA #LO(MODE7_VRAM+(16*&28))   \ Print the info text in the menu area
+ STA SC
+ LDA #HI(MODE7_VRAM+(16*&28))
+ STA SC+1
+
+ LDA infoAddr,Y         \ Set P(1 0) to the infoAddr entry for the menu
+ STA P                  \ item, which contains the address of the item's info
+ LDA infoAddr+1,Y       \ text
+ STA P+1
+
+ LDY #0                 \ Sey Y = 0 to act as an index into the string
+
+.pinf1
+
+ LDA (P),Y              \ Copy the Y-th byte of the message from P(1 0)
+
+ BEQ pinf2              \ If it is zero, jump to pinf2 to return from the
+                        \ subroutine
+
+ STA (SC),Y             \ Poke the byte into screen memory in SC(1 0)
+
+ INY                    \ Increment the index
+
+ BNE pinf1              \ Loop back to print the next character    
+
+ INC SC+1               \ Move on to the next page
+ INC P+1
+
+ BNE pinf1              \ Loop back to print the next character
+
+.pinf2
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
 \       Name: highlightAddr
 \       Type: Variable
 \   Category: Server menu
@@ -3457,6 +3546,72 @@
 .debounce
 
  EQUB 0                 \ The currently pressed key
+
+\ ******************************************************************************
+\
+\       Name: menuType
+\       Type: Variable
+\   Category: Server menu
+\    Summary: A variable to define whether this is the main menu or an info menu
+\
+\ ******************************************************************************
+
+.menuType
+
+ EQUB 0                 \ 0 = main menu, 1 = info menu
+
+\ ******************************************************************************
+\
+\       Name: menuShip
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The ship type for each menu item
+\
+\ ******************************************************************************
+
+.menuShip
+
+ EQUB CYL
+ EQUB KRA
+ EQUB OIL
+ EQUB SHU
+ EQUB 10
+ EQUB 12
+ EQUB COPS
+ EQUB CON
+
+\ ******************************************************************************
+\
+\       Name: menuDistance
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The z_lo ship distance for each menu item
+\
+\ ******************************************************************************
+
+.menuDistance
+
+ EQUB 128
+ EQUB 0
+ EQUB 128
+ EQUB 128
+ EQUB 128
+ EQUB 128
+ EQUB 128
+ EQUB 128
+
+\ ******************************************************************************
+\
+\       Name: shipDistance
+\       Type: Variable
+\   Category: Server menu
+\    Summary: A variable to hold the nearest ship distance for the current menu
+\
+\ ******************************************************************************
+
+.shipDistance
+
+ EQUB 0
 
 \ ******************************************************************************
 \
@@ -3515,6 +3670,168 @@
 
 \ ******************************************************************************
 \
+\       Name: infoAddr
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The address of the info text for each menu item
+\
+\ ******************************************************************************
+
+.infoAddr
+
+ EQUW info1
+ EQUW info2
+ EQUW info3
+ EQUW info4
+ EQUW info5
+ EQUW info6
+ EQUW info7
+ EQUW info8
+
+\ ******************************************************************************
+\
+\       Name: Info text
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The info text for each option
+\
+\ ******************************************************************************
+
+.infoKey
+
+ EQUS 132, 157, 131, " ESCAPE to go back, RETURN to run", 0
+
+.info1
+
+ EQUS 132, 157, 131, "Play flicker-free Elite over Econet  "
+ EQUS 134, "                                       "
+ EQUS 134, "The recommended option. Play Elite over"
+ EQUS 134, "Econet and join online competitions,   "
+ EQUS 134, "with flicker-free ships and planets.   "
+ EQUS 134, "                                       "
+ EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUB 0
+
+.info2
+
+ EQUS 132, 157, 131, "Play original Elite over Econet      "
+ EQUS 134, "                                       "
+ EQUS 134, "If you like your graphics authentically"
+ EQUS 134, "flickery, and with the 6502SP version  "
+ EQUS 134, "running at full speed, this is for you."
+ EQUS 134, "                                       "
+ EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUB 0
+
+.info3
+
+ EQUS 132, 157, 131, "Play Executive Elite over Econet     "
+ EQUS 134, "                                       "
+ EQUS 134, "The flicker-free version of Executive  "
+ EQUS 134, "Elite over Econet, with its fancy font "
+ EQUS 134, "and the famous Pizzasoft scroll text.  "
+ EQUS 134, "                                       "
+ EQUS 132, " For the 6502 Second Processor only    "
+ EQUB 0
+
+.info4
+
+ EQUS 132, 157, 131, "Play Archimedes Elite over Econet    "
+ EQUS 134, "                                       "
+ EQUS 134, "Many think this is the best version of "
+ EQUS 134, "Elite, and now RISC OS players can join"
+ EQUS 134, "online competitions alongside BBC Micro"
+ EQUS 134, "commanders. Choose this option for info"
+ EQUS 134, "on how to log in from an Archimedes.   "
+ EQUB 0
+
+.info5
+
+ EQUS 132, 157, 131, "Run the Elite over Econet scoreboard "
+ EQUS 134, "                                       "
+ EQUS 134, "Host your very own Elite scoreboard    "
+ EQUS 134, "with this option. See the website at   "
+ EQUS 134, "bbcelite.com/econet for more details.  "
+ EQUS 134, "                                       "
+ EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUB 0
+
+.info6
+
+ EQUS 132, 157, 131, "Run the Elite over Econet debugger   "
+ EQUS 134, "                                       "
+ EQUS 134, "Use the debugger to test your network  "
+ EQUS 134, "for playing Elite. See the website at  "
+ EQUS 134, "bbcelite.com/econet for more details.  "
+ EQUS 134, "                                       "
+ EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUB 0
+
+.info7
+
+ EQUS 132, 157, 131, "Elite over Econet version details    "
+ EQUS 134, "                                       "
+ EQUS 134, "Choose this option to run a *ELITE V   "
+ EQUS 134, "command that shows the build date for  "
+ EQUS 134, "the version of Elite on this server.   "
+ EQUS 134, "                                       "
+ EQUS 134, "You will then return to this menu.     "
+ EQUB 0
+
+.info8
+
+ EQUS 132, 157, 131, "More About Elite over Econet         "
+ EQUS 134, "                                       "
+ EQUS 134, "Find out more about the Elite over     "
+ EQUS 134, "Econet project, and where to go for    "
+ EQUS 134, "installation instructions, download    "
+ EQUS 134, "links, technical information, playing  "
+ EQUS 134, "tips and lots more.                    "
+ EQUB 0
+
+.infoArc
+
+ EQUS 141, 130, "    Archimedes Elite over Econet       "
+ EQUS 141, 130, "    Archimedes Elite over Econet       "
+ EQUS "                                        "
+ EQUS "To play Archimedes Elite over Econet,   "
+ EQUS "do the following:                       "
+ EQUS "                                        "
+ EQUS " * In the RISC OS Desktop, use the      "
+ EQUS "   Econet fileserver icon to log in to  "
+ EQUS "   server 63.13 as user ARCELITE (there "
+ EQUS "   is no password).                     "
+ EQUS "                                        "
+ EQUS " * Then follow the instructions in the  "
+ EQUS "   !ReadMe file (double-click to load). "
+ EQUS "                                        "
+ EQUS "Archimedes Elite over Econet runs on    "
+ EQUS "RISC OS 3 and above.                    "
+
+.infoAbout
+
+ EQUS 141, 130, "      About Elite over Econet          "
+ EQUS 141, 130, "      About Elite over Econet          "
+ EQUS "                                        "
+ EQUS "In the old days, Elite didn't work over "
+ EQUS "an Econet network. Those days are gone! "
+ EQUS "                                        "
+ EQUS "Not only does Elite now load from all   "
+ EQUS "Econet fileservers, but you can join    "
+ EQUS "multiplayer competitions and compete    "
+ EQUS "for the highest scores against players  "
+ EQUS "from all over the world.                "
+ EQUS "                                        "
+ EQUS "This server always hosts the very       "
+ EQUS "latest version of the game, for the     "
+ EQUS "BBC Micro, BBC Master, 6502 Second      "
+ EQUS "Processor and Acorn Archimedes.         "
+ EQUS "                                        "
+ EQUS "For more information, visit the project"
+ EQUS "website at", 129, "bbcelite.com/econet          "
+
+\ ******************************************************************************
+\
 \       Name: TITLE
 \       Type: Subroutine
 \   Category: Start and end
@@ -3567,12 +3884,11 @@
  JSR MVEIT              \ Move the ship in space according to the orientation
                         \ vectors and the new value in z_hi
 
- LDA #128               \ Set z_lo = 128, so the closest the ship gets to us is
+ LDA shipDistance       \ Set z_lo = 128, so the closest the ship gets to us is
  STA INWK+6             \ z_hi = 1, z_lo = 128, or 256 + 128 = 384
 
- ASL A                  \ Set A = 0
-
- STA INWK               \ Set x_lo = 0, so the ship remains in the screen centre
+ LDA #0                 \ Set x_lo = 0, so the ship remains in the screen centre
+ STA INWK
 
  LDA #10                \ Set y_lo = 10, so the ship remains slightly above the
  STA INWK+3             \ screen centre
@@ -3599,6 +3915,11 @@
 
                         \ Otherwise this is not the same key being held down, so
                         \ process it
+
+ LDX menuType           \ If menuType = 1 then this is an info screen, so jump
+ CPX #1                 \ to tite12 to process the key press
+ BNE P%+5
+ JMP tite12
 
  CMP #&29               \ If the down arrow is not being pressed, jump to tite4
  BNE tite4              \ to move on to the next key press
@@ -3712,11 +4033,14 @@
 
 .tite10
 
-                        \ We now move the ship away from us
+                        \ We now clear the menu area and move the ship away from
+                        \ us
 
- LDA INWK+7             \ If z_hi (the ship's distance) is 96, jump to tite12
+ JSR ClearMenu          \ Clear the menu
+
+ LDA INWK+7             \ If z_hi (the ship's distance) is 96, jump to tite11
  CMP #96                \ to return from the subroutine
- BEQ tite12
+ BEQ tite11
 
  INC INWK+7             \ Decrement the ship's distance, to move the ship away
                         \ from us
@@ -3740,9 +4064,35 @@
 
  JMP tite10             \ Loop back up to move/rotate the ship
 
-.tite12
+.tite11
 
  RTS                    \ Return from the subroutine
+
+.tite12
+
+                        \ If we get here then this is an info screen
+
+ STA debounce           \ Store the key press in debounce so we can ensure it
+                        \ is released before registering another key press
+
+ CMP #&70               \ If ESCAPE is not being pressed, jump to tite13
+ BNE tite13             \ to move on to the next key press
+
+                        \ If we get here then ESCAPE is being pressed
+
+ LDA #0                 \ Set menuType to 0 so we can reshow the main menu
+ STA menuType
+
+ BEQ tite10             \ Jump to tite10 to show the ship moving away from us
+                        \ and return from the subroutine
+
+.tite13
+
+ CMP #&49               \ If RETURN is being pressed, jump to tite20 to return     
+ BEQ tite10             \ from the subroutine
+
+ JMP TLL2               \ Loop back up to move/rotate the ship and check again
+                        \ for a key press
 
 \ ******************************************************************************
 \
