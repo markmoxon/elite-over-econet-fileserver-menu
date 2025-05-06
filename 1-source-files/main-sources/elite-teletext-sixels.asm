@@ -230,14 +230,14 @@ IF _LOADER
 
 ELSE
 
- CLC                    \ Set SC(1 0) to the screen address of the character
+ CLC                    \ Set P(1 0) to the screen address of the character
  LDA xSixel,X           \ block, starting with the low byte
  ADC ySixelLo,Y
- STA SC
+ STA P
 
  LDA ySixelHi,Y         \ And then the high byte
  ADC #HI(MODE7_VRAM)
- STA SCH
+ STA P+1
 
 ENDIF
 
@@ -260,9 +260,9 @@ IF _LOADER
 
 ELSE
 
- EOR (SC),Y             \ EOR the sixel into the screen, flipping whatever is
+ EOR (P),Y              \ EOR the sixel into the screen, flipping whatever is
  ORA #%00100000         \ already there
- STA (SC),Y
+ STA (P),Y
 
 ENDIF
 

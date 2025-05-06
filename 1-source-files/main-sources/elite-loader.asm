@@ -174,14 +174,7 @@
 
  JSR DrawSaturn         \ Call DrawSaturn to draw a mode 7 Saturn
 
- LDA VIA+&44            \ Read the 6522 System VIA T1C-L timer 1 low-order
- STA &0001              \ counter (SHEILA &44), which decrements one million
-                        \ times a second and will therefore be pretty random,
-                        \ and store it in location &0001, which is among the
-                        \ main game code's random seeds (so this seeds the
-                        \ random number generator for the main game)
-
- LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.MENU2")
+ LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("RUN MENU2")
  LDY #HI(RDLI)
 
  JMP OSCLI              \ Call OSCLI to run the OS command in RDLI, which runs
@@ -189,7 +182,7 @@
 
 .RDLI
 
- EQUS "R.MENU2"         \ This is short for "*RUN MENU2"
+ EQUS "RUN MENU2"
  EQUB 13
 
 \ ******************************************************************************

@@ -121,243 +121,11 @@
 \
 \ ******************************************************************************
 
- ORG &0000
+ ORG &0070
 
 .ZP
 
  SKIP 0                 \ The start of the zero page workspace
-
-.RAND
-
- SKIP 4                 \ Four 8-bit seeds for the random number generation
-                        \ system implemented in the DORND routine
-
-.TRTB%
-
- SKIP 2                 \ Contains the address of the keyboard translation
-                        \ table, which is used to translate internal key
-                        \ numbers to ASCII
-
-.T1
-
- SKIP 1                 \ Temporary storage, used in a number of places
-
-.SC
-
- SKIP 1                 \ Screen address (low byte)
-                        \
-                        \ Elite draws on-screen by poking bytes directly into
-                        \ screen memory, and SC(1 0) is typically set to the
-                        \ address of the character block containing the pixel
-                        \ we want to draw (see the deep dives on "Drawing
-                        \ monochrome pixels in mode 4" and "Drawing colour
-                        \ pixels in mode 5" for more details)
-
-.SCH
-
- SKIP 1                 \ Screen address (high byte)
-
-.XX16
-
- SKIP 18                \ Temporary storage for a block of values, used in a
-                        \ number of places
-
-.P
-
- SKIP 3                 \ Temporary storage, used in a number of places
-
-.XX0
-
- SKIP 2                 \ Temporary storage, used to store the address of a ship
-                        \ blueprint. For example, it is used when we add a new
-                        \ ship to the local bubble in routine NWSHP, and it
-                        \ contains the address of the current ship's blueprint
-                        \ as we loop through all the nearby ships in the main
-                        \ flight loop
-
-.INF
-
- SKIP 2                 \ Temporary storage, typically used for storing the
-                        \ address of a ship's data block, so it can be copied
-                        \ to and from the internal workspace at INWK
-
-.V
-
- SKIP 2                 \ Temporary storage, typically used for storing an
-                        \ address pointer
-
-.XX
-
- SKIP 2                 \ Temporary storage, typically used for storing a 16-bit
-                        \ x-coordinate
-
-.YY
-
- SKIP 2                 \ Temporary storage, typically used for storing a 16-bit
-                        \ y-coordinate
-
-.SUNX
-
- SKIP 2                 \ The 16-bit x-coordinate of the vertical centre axis
-                        \ of the sun (which might be off-screen)
-
-.BETA
-
- SKIP 1                 \ The current pitch angle beta, which is reduced from
-                        \ JSTY to a sign-magnitude value between -8 and +8
-                        \
-                        \ This describes how fast we are pitching our ship, and
-                        \ determines how fast the universe pitches around us
-                        \
-                        \ The sign bit is also stored in BET2, while the
-                        \ opposite sign is stored in BET2+1
-
-.BET1
-
- SKIP 1                 \ The magnitude of the pitch angle beta, i.e. |beta|,
-                        \ which is a positive value between 0 and 8
-
-.XC
-
- SKIP 1                 \ The x-coordinate of the text cursor (i.e. the text
-                        \ column), which can be from 0 to 32
-                        \
-                        \ A value of 0 denotes the leftmost column and 32 the
-                        \ rightmost column, but because the top part of the
-                        \ screen (the space view) has a white border that
-                        \ clashes with columns 0 and 32, text is only shown
-                        \ in columns 1-31
-
-.YC
-
- SKIP 1                 \ The y-coordinate of the text cursor (i.e. the text
-                        \ row), which can be from 0 to 23
-                        \
-                        \ The screen actually has 31 character rows if you
-                        \ include the dashboard, but the text printing routines
-                        \ only work on the top part (the space view), so the
-                        \ text cursor only goes up to a maximum of 23, the row
-                        \ just before the screen splits
-                        \
-                        \ A value of 0 denotes the top row, but because the
-                        \ top part of the screen has a white border that clashes
-                        \ with row 0, text is always shown at row 1 or greater
-
-.QQ22
-
- SKIP 2                 \ The two hyperspace countdown counters
-                        \
-                        \ Before a hyperspace jump, both QQ22 and QQ22+1 are
-                        \ set to 15
-                        \
-                        \ QQ22 is an internal counter that counts down by 1
-                        \ each time TT102 is called, which happens every
-                        \ iteration of the main game loop. When it reaches
-                        \ zero, the on-screen counter in QQ22+1 gets
-                        \ decremented, and QQ22 gets set to 5 and the countdown
-                        \ continues (so the first tick of the hyperspace counter
-                        \ takes 15 iterations to happen, but subsequent ticks
-                        \ take 5 iterations each)
-                        \
-                        \ QQ22+1 contains the number that's shown on-screen
-                        \ during the countdown. It counts down from 15 to 1, and
-                        \ when it hits 0, the hyperspace engines kick in
-
-.ECMA
-
- SKIP 1                 \ The E.C.M. countdown timer, which determines whether
-                        \ an E.C.M. system is currently operating:
-                        \
-                        \   * 0 = E.C.M. is off
-                        \
-                        \   * Non-zero = E.C.M. is on and is counting down
-                        \
-                        \ The counter starts at 32 when an E.C.M. is activated,
-                        \ either by us or by an opponent, and it decreases by 1
-                        \ in each iteration of the main flight loop until it
-                        \ reaches zero, at which point the E.C.M. switches off.
-                        \ Only one E.C.M. can be active at any one time, so
-                        \ there is only one counter
-
-.ALP1
-
- SKIP 1                 \ Magnitude of the roll angle alpha, i.e. |alpha|,
-                        \ which is a positive value between 0 and 31
-
-.ALP2
-
- SKIP 2                 \ Bit 7 of ALP2 = sign of the roll angle in ALPHA
-                        \
-                        \ Bit 7 of ALP2+1 = opposite sign to ALP2 and ALPHA
-
-.XX15
-
- SKIP 0                 \ Temporary storage, typically used for storing screen
-                        \ coordinates in line-drawing routines
-                        \
-                        \ There are six bytes of storage, from XX15 TO XX15+5.
-                        \ The first four bytes have the following aliases:
-                        \
-                        \   X1 = XX15
-                        \   Y1 = XX15+1
-                        \   X2 = XX15+2
-                        \   Y2 = XX15+3
-                        \
-                        \ These are typically used for describing lines in terms
-                        \ of screen coordinates, i.e. (X1, Y1) to (X2, Y2)
-                        \
-                        \ The last two bytes of XX15 do not have aliases
-
-.X1
-
- SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
-
-.Y1
-
- SKIP 1                 \ Temporary storage, typically used for y-coordinates in
-                        \ line-drawing routines
-
-.X2
-
- SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
-
-.Y2
-
- SKIP 1                 \ Temporary storage, typically used for y-coordinates in
-                        \ line-drawing routines
-
- SKIP 2                 \ The last two bytes of the XX15 block
-
-.XX12
-
- SKIP 6                 \ Temporary storage for a block of values, used in a
-                        \ number of places
-
-.K
-
- SKIP 4                 \ Temporary storage, used in a number of places
-
-.LAS
-
- SKIP 1                 \ Contains the laser power of the laser fitted to the
-                        \ current space view (or 0 if there is no laser fitted
-                        \ to the current view)
-                        \
-                        \ This gets set to bits 0-6 of the laser power byte from
-                        \ the commander data block, which contains the laser's
-                        \ power (bit 7 doesn't denote laser power, just whether
-                        \ or not the laser pulses, so that is not stored here)
-
-.MSTG
-
- SKIP 1                 \ The current missile lock target
-                        \
-                        \   * &FF = no target
-                        \
-                        \   * 1-12 = the slot number of the ship that our
-                        \            missile is locked onto
 
 .XX1
 
@@ -399,87 +167,31 @@
                         \ in the deep dive on "Advanced tactics with the NEWB
                         \ flags"
 
-.LSP
+ ORG &00B0
 
- SKIP 1                 \ The ball line heap pointer, which contains the number
-                        \ of the first free byte after the end of the LSX2 and
-                        \ LSY2 heaps (see the deep dive on "The ball line heap"
-                        \ for details)
-
-.QQ15
-
- SKIP 6                 \ The three 16-bit seeds for the selected system, i.e.
-                        \ the one in the crosshairs in the Short-range Chart
-                        \
-                        \ See the deep dives on "Galaxy and system seeds" and
-                        \ "Twisting the system seeds" for more details
-
-.K5
-
- SKIP 0                 \ Temporary storage used to store segment coordinates
-                        \ across successive calls to BLINE, the ball line
-                        \ routine
-
-.XX18
-
- SKIP 0                 \ Temporary storage used to store coordinates in the
-                        \ LL9 ship-drawing routine
-
-.QQ17
-
- SKIP 1                 \ Contains a number of flags that affect how text tokens
-                        \ are printed, particularly capitalisation:
-                        \
-                        \   * If all bits are set (255) then text printing is
-                        \     disabled
-                        \
-                        \   * Bit 7: 0 = ALL CAPS
-                        \            1 = Sentence Case, bit 6 determines the
-                        \                case of the next letter to print
-                        \
-                        \   * Bit 6: 0 = print the next letter in upper case
-                        \            1 = print the next letter in lower case
-                        \
-                        \   * Bits 0-5: If any of bits 0-5 are set, print in
-                        \               lower case
-                        \
-                        \ So:
-                        \
-                        \   * QQ17 = 0 means case is set to ALL CAPS
-                        \
-                        \   * QQ17 = %10000000 means Sentence Case, currently
-                        \            printing upper case
-                        \
-                        \   * QQ17 = %11000000 means Sentence Case, currently
-                        \            printing lower case
-                        \
-                        \   * QQ17 = %11111111 means printing is disabled
-
-.QQ19
+.P
 
  SKIP 3                 \ Temporary storage, used in a number of places
 
-.K6
+.XX0
 
- SKIP 5                 \ Temporary storage, typically used for storing
-                        \ coordinates during vector calculations
+ SKIP 2                 \ Temporary storage, used to store the address of a ship
+                        \ blueprint. For example, it is used when we add a new
+                        \ ship to the local bubble in routine NWSHP, and it
+                        \ contains the address of the current ship's blueprint
+                        \ as we loop through all the nearby ships in the main
+                        \ flight loop
 
-.BET2
+.INF
 
- SKIP 2                 \ Bit 7 of BET2 = sign of the pitch angle in BETA
-                        \
-                        \ Bit 7 of BET2+1 = opposite sign to BET2 and BETA
+ SKIP 2                 \ Temporary storage, typically used for storing the
+                        \ address of a ship's data block, so it can be copied
+                        \ to and from the internal workspace at INWK
 
-.DELTA
+.V
 
- SKIP 1                 \ Our current speed, in the range 1-40
-
-.DELT4
-
- SKIP 2                 \ Our current speed * 64 as a 16-bit value
-                        \
-                        \ This is stored as DELT4(1 0), so the high byte in
-                        \ DELT4+1 therefore contains our current speed / 4
+ SKIP 2                 \ Temporary storage, typically used for storing an
+                        \ address pointer
 
 .U
 
@@ -497,209 +209,9 @@
 
  SKIP 1                 \ Temporary storage, used in a number of places
 
-.XSAV
-
- SKIP 1                 \ Temporary storage for saving the value of the X
-                        \ register, used in a number of places
-
-.YSAV
-
- SKIP 1                 \ Temporary storage for saving the value of the Y
-                        \ register, used in a number of places
-
-.XX17
-
- SKIP 1                 \ Temporary storage, used in BPRNT to store the number
-                        \ of characters to print, and as the edge counter in the
-                        \ main ship-drawing routine
-
-.QQ11
-
- SKIP 1                 \ The type of the current view:
-                        \
-                        \   0   = Space view
-                        \   1   = Title screen
-                        \         Get commander name ("@", save/load commander)
-                        \         In-system jump just arrived ("J")
-                        \         Data on System screen (red key f6)
-                        \   2   = Buy Cargo screen (red key f1)
-                        \   3   = Mis-jump just arrived (witchspace)
-                        \   4   = Sell Cargo screen (red key f2)
-                        \   6   = Death screen
-                        \   8   = Status Mode screen (red key f8)
-                        \         Inventory screen (red key f9)
-                        \   16  = Market Price screen (red key f7)
-                        \   32  = Equip Ship screen (red key f3)
-                        \   64  = Long-range Chart (red key f4)
-                        \   128 = Short-range Chart (red key f5)
-                        \   255 = Launch view
-                        \
-                        \ This value is typically set by calling routine TT66
-
-.ZZ
-
- SKIP 1                 \ Temporary storage, typically used for distance values
-
-.XX13
-
- SKIP 1                 \ Temporary storage, typically used in the line-drawing
-                        \ routines
-
-.MCNT
-
- SKIP 1                 \ The main loop counter
-                        \
-                        \ This counter determines how often certain actions are
-                        \ performed within the main loop. See the deep dive on
-                        \ "Scheduling tasks with the main loop counter" for more
-                        \ details
-
-.DL
-
- SKIP 1                 \ Vertical sync flag
-                        \
-                        \ DL gets set to 30 every time we reach vertical sync on
-                        \ the video system, which happens 50 times a second
-                        \ (50Hz). The WSCAN routine uses this to pause until the
-                        \ vertical sync, by setting DL to 0 and then monitoring
-                        \ its value until it changes to 30
-
-.TYPE
-
- SKIP 1                 \ The current ship type
-                        \
-                        \ This is where we store the current ship type for when
-                        \ we are iterating through the ships in the local bubble
-                        \ as part of the main flight loop. See the table at XX21
-                        \ for information about ship types
-
-.ALPHA
-
- SKIP 1                 \ The current roll angle alpha, which is reduced from
-                        \ JSTX to a sign-magnitude value between -31 and +31
-                        \
-                        \ This describes how fast we are rolling our ship, and
-                        \ determines how fast the universe rolls around us
-                        \
-                        \ The sign bit is also stored in ALP2, while the
-                        \ opposite sign is stored in ALP2+1
-
-.QQ12
-
- SKIP 1                 \ Our "docked" status
-                        \
-                        \   * 0 = we are not docked
-                        \
-                        \   * &FF = we are docked
-
-.TGT
-
- SKIP 1                 \ Temporary storage, typically used as a target value
-                        \ for counters when drawing explosion clouds and partial
-                        \ circles
-
-.SWAP
-
- SKIP 1                 \ Temporary storage, used to store a flag that records
-                        \ whether or not we had to swap a line's start and end
-                        \ coordinates around when clipping the line in routine
-                        \ LL145 (the flag is used in places like BLINE to swap
-                        \ them back)
-
-.COL
-
- SKIP 1                 \ Temporary storage, used to store colour information
-                        \ when drawing pixels in the dashboard
-
-.FLAG
-
- SKIP 1                 \ A flag that's used to define whether this is the first
-                        \ call to the ball line routine in BLINE, so it knows
-                        \ whether to wait for the second call before storing
-                        \ segment data in the ball line heap
-
-.CNT
-
- SKIP 1                 \ Temporary storage, typically used for storing the
-                        \ number of iterations required when looping
-
-.CNT2
-
- SKIP 1                 \ Temporary storage, used in the planet-drawing routine
-                        \ to store the segment number where the arc of a partial
-                        \ circle should start
-
-.STP
-
- SKIP 1                 \ The step size for drawing circles
-                        \
-                        \ Circles in Elite are split up into 64 points, and the
-                        \ step size determines how many points to skip with each
-                        \ straight-line segment, so the smaller the step size,
-                        \ the smoother the circle. The values used are:
-                        \
-                        \   * 2 for big planets and the circles on the charts
-                        \   * 4 for medium planets and the launch tunnel
-                        \   * 8 for small planets and the hyperspace tunnel
-                        \
-                        \ As the step size increases we move from smoother
-                        \ circles at the top to more polygonal at the bottom.
-                        \ See the CIRCLE2 routine for more details
-
-.XX4
-
- SKIP 1                 \ Temporary storage, used in a number of places
-
-.XX20
-
- SKIP 1                 \ Temporary storage, used in a number of places
-
-.LSNUM
-
- SKIP 1                 \ The pointer to the current position in the ship line
-                        \ heap as we work our way through the new ship's edges
-                        \ (and the corresponding old ship's edges) when drawing
-                        \ the ship in the main ship-drawing routine at LL9
-
-.LSNUM2
-
- SKIP 0                 \ The size of the existing ship line heap for the ship
-                        \ we are drawing in LL9, i.e. the number of lines in the
-                        \ old ship that is currently shown on-screen and which
-                        \ we need to erase
-
-.RAT
-
- SKIP 1                 \ Used to store different signs depending on the current
-                        \ space view, for use in calculating stardust movement
-
-.RAT2
-
- SKIP 1                 \ Temporary storage, used to store the pitch and roll
-                        \ signs when moving objects and stardust
-
-.K2
-
- SKIP 4                 \ Temporary storage, used in a number of places
-
- ORG &00D1
-
 .T
 
  SKIP 1                 \ Temporary storage, used in a number of places
-
-.K3
-
- SKIP 0                 \ Temporary storage, used in a number of places
-
-.XX2
-
- SKIP 14                \ Temporary storage, used to store the visibility of the
-                        \ ship's faces during the ship-drawing routine at LL9
-
-.K4
-
- SKIP 2                 \ Temporary storage, used in a number of places
 
  PRINT "Zero page variables from ", ~ZP, " to ", ~P%
 
@@ -790,6 +302,8 @@
 \
 \ ******************************************************************************
 
+.UP
+
 .FRIN
 
  SKIP NOSH + 1          \ Slots for the ships in the local bubble of universe
@@ -815,6 +329,170 @@
                         \ new ships (and their associated ship line heaps), in
                         \ which case SLSP is lowered to provide more heap space,
                         \ assuming there is enough free memory to do so
+
+.XX16
+
+ SKIP 18                \ Temporary storage for a block of values, used in a
+                        \ number of places
+
+.T1
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.XX
+
+ SKIP 2                 \ Temporary storage, typically used for storing a 16-bit
+                        \ x-coordinate
+
+.BETA
+
+ SKIP 1                 \ The current pitch angle beta, which is reduced from
+                        \ JSTY to a sign-magnitude value between -8 and +8
+                        \
+                        \ This describes how fast we are pitching our ship, and
+                        \ determines how fast the universe pitches around us
+
+.ALPHA
+
+ SKIP 1                 \ The current roll angle alpha, which is reduced from
+                        \ JSTX to a sign-magnitude value between -31 and +31
+                        \
+                        \ This describes how fast we are rolling our ship, and
+                        \ determines how fast the universe rolls around us
+
+.XX15
+
+ SKIP 0                 \ Temporary storage, typically used for storing screen
+                        \ coordinates in line-drawing routines
+                        \
+                        \ There are six bytes of storage, from XX15 TO XX15+5.
+                        \ The first four bytes have the following aliases:
+                        \
+                        \   X1 = XX15
+                        \   Y1 = XX15+1
+                        \   X2 = XX15+2
+                        \   Y2 = XX15+3
+                        \
+                        \ These are typically used for describing lines in terms
+                        \ of screen coordinates, i.e. (X1, Y1) to (X2, Y2)
+                        \
+                        \ The last two bytes of XX15 do not have aliases
+
+.X1
+
+ SKIP 1                 \ Temporary storage, typically used for x-coordinates in
+                        \ line-drawing routines
+
+.Y1
+
+ SKIP 1                 \ Temporary storage, typically used for y-coordinates in
+                        \ line-drawing routines
+
+.X2
+
+ SKIP 1                 \ Temporary storage, typically used for x-coordinates in
+                        \ line-drawing routines
+
+.Y2
+
+ SKIP 1                 \ Temporary storage, typically used for y-coordinates in
+                        \ line-drawing routines
+
+ SKIP 2                 \ The last two bytes of the XX15 block
+
+.XX12
+
+ SKIP 6                 \ Temporary storage for a block of values, used in a
+                        \ number of places
+
+.K
+
+ SKIP 4                 \ Temporary storage, used in a number of places
+
+
+.XX18
+
+ SKIP 9                 \ Temporary storage used to store coordinates in the
+                        \ LL9 ship-drawing routine
+
+.YSAV
+
+ SKIP 1                 \ Temporary storage for saving the value of the Y
+                        \ register, used in a number of places
+
+.XX17
+
+ SKIP 1                 \ Temporary storage, used in BPRNT to store the number
+                        \ of characters to print, and as the edge counter in the
+                        \ main ship-drawing routine
+
+.XX13
+
+ SKIP 1                 \ Temporary storage, typically used in the line-drawing
+                        \ routines
+
+.MCNT
+
+ SKIP 1                 \ The main loop counter
+                        \
+                        \ This counter determines how often certain actions are
+                        \ performed within the main loop. See the deep dive on
+                        \ "Scheduling tasks with the main loop counter" for more
+                        \ details
+
+.TYPE
+
+ SKIP 1                 \ The current ship type
+                        \
+                        \ This is where we store the current ship type for when
+                        \ we are iterating through the ships in the local bubble
+                        \ as part of the main flight loop. See the table at XX21
+                        \ for information about ship types
+
+.SWAP
+
+ SKIP 1                 \ Temporary storage, used to store a flag that records
+                        \ whether or not we had to swap a line's start and end
+                        \ coordinates around when clipping the line in routine
+                        \ LL145 (the flag is used in places like BLINE to swap
+                        \ them back)
+
+.CNT
+
+ SKIP 1                 \ Temporary storage, typically used for storing the
+                        \ number of iterations required when looping
+
+.XX4
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.XX20
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.LSNUM
+
+ SKIP 1                 \ The pointer to the current position in the ship line
+                        \ heap as we work our way through the new ship's edges
+                        \ (and the corresponding old ship's edges) when drawing
+                        \ the ship in the main ship-drawing routine at LL9
+
+.LSNUM2
+
+ SKIP 1                 \ The size of the existing ship line heap for the ship
+                        \ we are drawing in LL9, i.e. the number of lines in the
+                        \ old ship that is currently shown on-screen and which
+                        \ we need to erase
+
+.RAT2
+
+ SKIP 1                 \ Temporary storage, used to store the pitch and roll
+                        \ signs when moving objects and stardust
+
+.XX2
+
+ SKIP 14                \ Temporary storage, used to store the visibility of the
+                        \ ship's faces during the ship-drawing routine at LL9
 
 \ ******************************************************************************
 \
@@ -851,7 +529,7 @@
 
  LDA MCNT               \ Fetch the main loop counter
 
- EOR XSAV               \ Fetch the slot number of the ship we are moving, EOR
+\EOR XSAV               \ Fetch the slot number of the ship we are moving, EOR
  AND #15                \ with the loop counter and apply mod 15 to the result.
  BNE MV3                \ The result will be zero when "counter mod 15" matches
                         \ the slot number, so this makes sure we call TIDY 12
@@ -2263,30 +1941,6 @@
 
 \ ******************************************************************************
 \
-\       Name: MUT3
-\       Type: Subroutine
-\   Category: Maths (Arithmetic)
-\    Summary: An unused routine that does the same as MUT2
-\
-\ ------------------------------------------------------------------------------
-\
-\ This routine is never actually called, but it is identical to MUT2, as the
-\ extra instructions have no effect.
-\
-\ ******************************************************************************
-
-.MUT3
-
- LDX ALP1               \ Set P = ALP1, though this gets overwritten by the
- STX P                  \ following, so this has no effect
-
-                        \ Fall through into MUT2 to do the following:
-                        \
-                        \   (S R) = XX(1 0)
-                        \   (A P) = Q * A
-
-\ ******************************************************************************
-\
 \       Name: MUT2
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -2390,7 +2044,7 @@
 
 .MUL4
 
- BCC P%+4               \ If C (i.e. the next bit from P) is set, do the
+ BCC P%+5               \ If C (i.e. the next bit from P) is set, do the
  ADC T1                 \ addition for this bit of P:
                         \
                         \   A = A + T1 + C
@@ -3045,40 +2699,14 @@
 \ Reset our ship and various controls, recharge shields and energy, and then
 \ fall through into RES2 to reset the stardust and the ship workspace at INWK.
 \
-\ In this subroutine, this means zero-filling the following locations:
-\
-\   * Pages &9, &A, &B, &C and &D
-\
-\   * BETA to BETA+8, which covers the following:
-\
-\     * BETA, BET1 - Set pitch to 0
-\
-\     * XC, YC - Set text cursor to (0, 0)
-\
-\     * QQ22 - Set hyperspace counters to 0
-\
-\     * ECMA - Turn E.C.M. off
-\
-\     * ALP1, ALP2 - Set roll signs to 0
-\
-\ It also sets QQ12 to &FF, to indicate we are docked, recharges the shields and
-\ energy banks, and then falls through into RES2.
-\
 \ ******************************************************************************
 
 .RESET
 
  JSR ZERO               \ Reset the ship slots
 
- LDX #6                 \ Set up a counter for zeroing BETA through BETA+6
-
-.SAL3
-
- STA BETA,X             \ Zero the X-th byte after BETA
-
- DEX                    \ Decrement the loop counter
-
- BPL SAL3               \ Loop back for the next byte to zero
+ LDX #0                 \ Zero the rotation angles
+ STX BETA
 
                         \ Fall through into RES2 to reset the stardust and ship
                         \ workspace at INWK
@@ -3106,23 +2734,12 @@
 
 .RES2
 
- LDA #128               \ Set the current pitch rate to the mid-point, 128
-
- STA ALP2               \ Reset ALP2 (roll sign) and BET2 (pitch sign)
- STA BET2               \ to negative, i.e. pitch and roll negative
-
- ASL A                  \ This sets A to 0
-
- STA ALP2+1             \ Reset ALP2+1 (flipped roll sign) and BET2+1 (flipped
- STA BET2+1             \ pitch sign) to positive, i.e. pitch and roll negative
-
+ LDA #0
  STA MCNT               \ Reset MCNT (the main loop counter) to 0
 
 .modify
 
  STA ALPHA              \ Reset ALPHA (roll angle alpha) to 3
-
- STA ALP1               \ Reset ALP1 (magnitude of roll angle alpha) to 3
 
  JSR ZERO               \ Reset the ship slots
 
@@ -3199,57 +2816,6 @@
 
 \ ******************************************************************************
 \
-\       Name: DORND
-\       Type: Subroutine
-\   Category: Maths (Arithmetic)
-\    Summary: Generate random numbers
-\  Deep dive: Generating random numbers
-\             Fixing ship positions
-\
-\ ------------------------------------------------------------------------------
-\
-\ Set A and X to random numbers (though note that X is set to the random number
-\ that was returned in A the last time DORND was called).
-\
-\ The C and V flags are also set randomly.
-\
-\ If we want to generate a repeatable sequence of random numbers, when
-\ generating explosion clouds, for example, then we call DORND2 to ensure that
-\ the value of the C flag on entry doesn't affect the outcome, as otherwise we
-\ might not get the same sequence of numbers if the C flag changes.
-\
-\ ------------------------------------------------------------------------------
-\
-\ Other entry points:
-\
-\   DORND2              Make sure the C flag doesn't affect the outcome
-\
-\ ******************************************************************************
-
-.DORND2
-
- CLC                    \ Clear the C flag so the value of the C flag on entry
-                        \ doesn't affect the outcome
-
-.DORND
-
- LDA RAND               \ Calculate the next two values f2 and f3 in the feeder
- ROL A                  \ sequence:
- TAX                    \
- ADC RAND+2             \   * f2 = (f1 << 1) mod 256 + C flag on entry
- STA RAND               \   * f3 = f0 + f2 + (1 if bit 7 of f1 is set)
- STX RAND+2             \   * C flag is set according to the f3 calculation
-
- LDA RAND+1             \ Calculate the next value m2 in the main sequence:
- TAX                    \
- ADC RAND+3             \   * A = m2 = m0 + m1 + C flag from feeder calculation
- STA RAND+1             \   * X = m1
- STX RAND+3             \   * C and V flags set according to the m2 calculation
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
 \       Name: BEGIN
 \       Type: Subroutine
 \   Category: Server menu
@@ -3259,8 +2825,8 @@
 
 .BEGIN
 
- LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
- TXS                    \ location for the 6502 stack, so this instruction
+\LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
+\TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
  JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
@@ -3302,7 +2868,7 @@
  LDA menuShip,Y
  STA TYPE
 
- LDA menuShip,Y         \ Set TYPE to the correct ship for this menu
+ LDA shipDistance,Y     \ Set shipDistance to the correct distance for this menu
  STA shipDistance
 
  LDA #1                 \ Set the menu type to 1, for the info menu
@@ -3317,10 +2883,31 @@
 
 .begn2
 
+ LDA selection          \ If menu item 1 was not chosen, jump to begn3 to check
+ CMP #1                 \ the next item
+ BNE begn3
+
+                        \ If we get here then menu item 1 was chosen
+
+ LDX #LO(command1)      \ Set (Y X) to point to command1
+ LDY #HI(command1)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command1, which
+                        \ sets the f0 key to run flicker-free Elite
+
+ LDX #LO(command1a)      \ Set (Y X) to point to command1
+ LDY #HI(command1a)
+
+ LDA #138
+ LDX #0
+ LDY #128
+ JSR OSBYTE
+
+ RTS
+
+.begn3
                         \ Otherwise we have chosen to run the selected menu
                         \ item, so that's what we do now
-
-\ INSERT RUN CODE HERE
 
  RTS                    \ Return from the subroutine
 
@@ -3357,17 +2944,17 @@
  ASL A                  \ Set A = Y * 2 so we can use it as an index into the
  TAY                    \ address table at highlightAddr
 
- LDA highlightAddr,Y    \ Set SC(1 0) to the highlightAddr entry for the menu
- STA SC                 \ item, which contains the screen address of the item's
+ LDA highlightAddr,Y    \ Set V(1 0) to the highlightAddr entry for the menu
+ STA V                  \ item, which contains the screen address of the item's
  LDA highlightAddr+1,Y  \ highlight characters
- STA SC+1
+ STA V+1
 
  LDY #0                 \ Set the characters to 131, "]" to highlight the item
  LDA #131
- STA (SC),Y
+ STA (V),Y
  LDA #']'
  INY
- STA (SC),Y
+ STA (V),Y
 
  PLA                    \ Restore the number of the menu item in Y
  TAY
@@ -3409,17 +2996,17 @@
  ASL A                  \ Set A = Y * 2 so we can use it as an index into the
  TAY                    \ address table at highlightAddr
 
- LDA highlightAddr,Y    \ Set SC(1 0) to the highlightAddr entry for the menu
- STA SC                 \ item, which contains the screen address of the item's
+ LDA highlightAddr,Y    \ Set V(1 0) to the highlightAddr entry for the menu
+ STA V                  \ item, which contains the screen address of the item's
  LDA highlightAddr+1,Y  \ highlight characters
- STA SC+1
+ STA V+1
 
  LDY #0                 \ Set the characters to 134, " " to clear the item
  LDA #134
- STA (SC),Y
+ STA (V),Y
  LDA #' '
  INY
- STA (SC),Y
+ STA (V),Y
 
  PLA                    \ Restore the number of the menu item in Y
  TAY
@@ -3466,9 +3053,9 @@
  TAY
 
  LDA #LO(MODE7_VRAM+(16*&28))   \ Print the info text in the menu area
- STA SC
+ STA V
  LDA #HI(MODE7_VRAM+(16*&28))
- STA SC+1
+ STA V+1
 
  LDA infoAddr,Y         \ Set P(1 0) to the infoAddr entry for the menu
  STA P                  \ item, which contains the address of the item's info
@@ -3484,13 +3071,13 @@
  BEQ pinf2              \ If it is zero, jump to pinf2 to return from the
                         \ subroutine
 
- STA (SC),Y             \ Poke the byte into screen memory in SC(1 0)
+ STA (V),Y              \ Poke the byte into screen memory in V(1 0)
 
  INY                    \ Increment the index
 
  BNE pinf1              \ Loop back to print the next character    
 
- INC SC+1               \ Move on to the next page
+ INC V+1                \ Move on to the next page
  INC P+1
 
  BNE pinf1              \ Loop back to print the next character
@@ -3592,7 +3179,7 @@
 .menuDistance
 
  EQUB 128
- EQUB 0
+ EQUB 128
  EQUB 128
  EQUB 128
  EQUB 128
@@ -3830,6 +3417,38 @@
  EQUS "For more information, visit the project"
  EQUS "website at", 129, "bbcelite.com/econet          "
 
+.command1
+
+ EQUS "BASIC", 13
+
+.command1a
+
+ EQUS "KEY0*I AM ELITE|M", 13
+
+.command2
+
+ EQUS "*I AM ELITEO", 13
+
+.command3
+
+ EQUS "*I AM ELITEX", 13
+
+.command56
+
+ EQUS "*I AM UTILS", 13
+
+.command5
+
+ EQUS "*ELITE S", 13
+
+.command6
+
+ EQUS "*ELITE D", 13
+
+.command7
+
+ EQUS "*ELITE V", 13
+
 \ ******************************************************************************
 \
 \       Name: TITLE
@@ -3866,9 +3485,6 @@
 
  LDA TYPE               \ Set up a new ship, using the ship type in TYPE
  JSR NWSHP
-
- LDY #0                 \ Set DELTA = 0 (i.e. ship speed = 0)
- STY DELTA
 
 .TLL2
 
@@ -4088,7 +3704,7 @@
 
 .tite13
 
- CMP #&49               \ If RETURN is being pressed, jump to tite20 to return     
+ CMP #&49               \ If RETURN is being pressed, jump to tite10 to return     
  BEQ tite10             \ from the subroutine
 
  JMP TLL2               \ Loop back up to move/rotate the ship and check again
@@ -5387,7 +5003,7 @@
 
  INY                    \ Increment Y (so the loop starts at 3)
 
- JSR DORND              \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 
  STA (XX19),Y           \ Store A in the Y-th byte of the ship line heap
 
@@ -5635,8 +5251,8 @@
                         \   R = 256 * |nosev_z_hi| * 2 / 197
                         \     = 2.6 * |nosev_z_hi|
 
- LDX R                  \ Store R in the low byte's location, so we can keep the
- STX XX16,Y             \ old, unscaled high byte intact for the sign
+ LDA R                  \ Store R in the low byte's location, so we can keep the
+ STA XX16,Y             \ old, unscaled high byte intact for the sign
 
  DEY                    \ Decrement the loop counter twice
  DEY
@@ -6527,7 +6143,7 @@
  SBC XX15
  STA XX15
 
- BCC P%+4               \ If the above subtraction underflowed then we need to
+ BCC P%+5               \ If the above subtraction underflowed then we need to
  INC XX15+1             \ bump the high byte of the result up by 1
 
  LDA XX15+2             \ And now we flip the sign of the result to get the
@@ -7175,7 +6791,7 @@
  STA XX12               \ the laser beam move around as the ship moves in space
 
  LDA XX1+2              \ If the ship's x_sign is positive, skip the next
- BPL P%+4               \ instruction
+ BPL P%+5               \ instruction
 
  DEC XX15+4             \ The ship's x_sign is negative (i.e. it's on the left
                         \ side of the screen), so switch the laser beam so it
@@ -8647,7 +8263,7 @@
  BEQ pzer2              \ If it is zero, jump to pzer2 to return from the
                         \ subroutine
 
- STA (SC),Y             \ Poke the byte into screen memory in SC(1 0)
+ STA (V),Y              \ Poke the byte into screen memory in V(1 0)
 
  INY                    \ Increment the index
 

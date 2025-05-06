@@ -94,9 +94,9 @@ ENDMACRO
 MACRO TEXT_AT x, y, textAddr
 
  LDA #LO(MODE7_VRAM+(y*&28)+x)
- STA SC
+ STA V
  LDA #HI(MODE7_VRAM+(y*&28)+x)
- STA SC+1
+ STA V+1
  LDA #LO(textAddr)
  STA P
  LDA #HI(textAddr)

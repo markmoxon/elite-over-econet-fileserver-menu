@@ -20,81 +20,6 @@
 
 \ ******************************************************************************
 \
-\       Name: SetTextYellow
-\       Type: Subroutine
-\   Category: Teletext Elite
-\    Summary: Set yellow text in mode 7
-\
-\ ******************************************************************************
-
-.SetTextYellow
-
- LDX #131               \ Set X to the "yellow text" control code
-
- EQUB &2C               \ Skip the next instruction, so we fall through into
-                        \ PrintCharacter to print the control code
-
-\ ******************************************************************************
-\
-\       Name: SetGraphicsWhite
-\       Type: Subroutine
-\   Category: Teletext Elite
-\    Summary: Set white graphics in mode 7
-\
-\ ******************************************************************************
-
-.SetGraphicsWhite
-
- LDX #151               \ Set X to the "white graphics" control code
-
-                        \ Fall through into PrintCharacter to print the control
-                        \ code
-
-\ ******************************************************************************
-\
-\       Name: PrintCharacter
-\       Type: Subroutine
-\   Category: Teletext Elite
-\    Summary: Print a teletext character at the current cursor
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   X                   The teletext character to print
-\
-\ ******************************************************************************
-
-.PrintCharacter
-
- LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
-
- CMP #25                \ If the character is off the bottom of the screen, jump
- BCS prin1              \ to prin1 to return from the subroutine
-
- ASL A                  \ Add the address for the start of row YC (from the
- TAY                    \ charRowAddress table) to SC to give the screen
- LDA charRowAddress,Y   \ address of the character we want to print
- STA P
- LDA charRowAddress+1,Y
- STA P+1
-
- LDY XC                 \ Fetch XC, x-coordinate (column) of the text cursor
-
- CPY #40                \ If the character is off to the right of the screen,
- BCS prin1              \ jump to prin1 to return from the subroutine
-
- TXA                    \ Store the character given in X in the XC-th character
- STA (P),Y              \ on the row at SC(1 0)
-
- INC XC                 \ Move the text cursor to the right by one character
-
-.prin1
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
 \       Name: ClearMode7Screen
 \       Type: Subroutine
 \   Category: Teletext Elite
@@ -133,24 +58,24 @@
 
 .StyleTitleRow
 
- BIT displayTitle       \ If bit 7 of displayTitle is set, jump to stit1 to skip
- BMI stit1              \ displaying the title row
+ BIT displayTitle       \ If bit 7 of displayTitle is set, jump to stit4 to skip
+ BMI stit4              \ displaying the title row
 
- LDA QQ11               \ If this is not the death screen, jump to stit2 to
- CMP #6                 \ display the title row
- BNE stit2
+\LDA QQ11               \ If this is not the death screen, jump to stit2 to
+\CMP #6                 \ display the title row
+\BNE stit2
 
-.stit1
+\.stit1
 
- LDA #151               \ This is either the death screen or bit 7 of
- STA MODE7_VRAM         \ displayTitle is set, so style the top row as white
+\LDA #151               \ This is either the death screen or bit 7 of
+\STA MODE7_VRAM         \ displayTitle is set, so style the top row as white
                         \ graphics
 
- BNE stit4              \ Jump to stit4 to style the second row as white
+\BNE stit4              \ Jump to stit4 to style the second row as white
                         \ graphics (this BNE is effectively a JMP as A is never
                         \ zero)
 
-.stit2
+\.stit2
 
                         \ Galfax code removed as it isn't needed
 
@@ -170,7 +95,6 @@
 
  LDA #134               \ Style the rest of the screen as cyan text, returning
  JMP SetMode7Colour     \ from the subroutine using a tail call
-
 
 \ ******************************************************************************
 \
