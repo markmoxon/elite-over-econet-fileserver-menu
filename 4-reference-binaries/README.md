@@ -1,8 +1,8 @@
-# Original binaries for Teletext Elite
+# Original binaries for the Elite over Econet server menu
 
-This folder contains reference binaries for Teletext Elite.
+This folder contains reference binaries for the Elite over Econet server menu.
 
-* [sth](sth) contains the binaries for the version that is based on the Stairway to Hell disc version
+* [menu](menu) contains the binaries for the latest version
 
 ---
 

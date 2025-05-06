@@ -1,12 +1,10 @@
-# Source files for Teletext Elite
+# Source files for the Elite over Econet server menu
 
-This folder contains the source files for Teletext Elite.
+This folder contains the source files for the Elite over Econet server menu.
 
-* [images](images) contains the image binaries for the title screen and dashboard
+* [main-sources](main-sources) contains the source code for the menu program
 
-* [main-sources](main-sources) contains the annotated source code
-
-* [other-files](other-files) contains a maxed-out commander file
+* [server-files](server-files) contains other files for the Elite over Econet accounts on the TNMoC Econet Cloud
 
 ---
 
