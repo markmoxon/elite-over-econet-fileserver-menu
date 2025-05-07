@@ -150,7 +150,8 @@
 
  LDA #144               \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
  LDX #255               \ the screen down one line and turn screen interlace on
- JSR OSB
+ LDY #0
+ JSR OSBYTE
 
  LDA #LO(B%)            \ Set the low byte of ZP(1 0) to point to the VDU code
  STA ZP                 \ table at B%
@@ -846,21 +847,6 @@
  BNE LL6                \ Loop back to LL6 until we have done 8 loops
 
  RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: OSB
-\       Type: Subroutine
-\   Category: Utility routines
-\    Summary: A convenience routine for calling OSBYTE with Y = 0
-\
-\ ******************************************************************************
-
-.OSB
-
- LDY #0                 \ Call OSBYTE with Y = 0, returning from the subroutine
- JMP OSBYTE             \ using a tail call (so we can call OSB to call OSBYTE
-                        \ for when we know we want Y set to 0)
 
  MODE7_HIGH_Y = 3*25    \ The last sixel y-coordinate we can draw sixels in + 1
                         \ (so we can draw on the whole screen)

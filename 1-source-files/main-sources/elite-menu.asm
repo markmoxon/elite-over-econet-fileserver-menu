@@ -2825,10 +2825,6 @@
 
 .BEGIN
 
-\LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
-\TXS                    \ location for the 6502 stack, so this instruction
-                        \ effectively resets the stack
-
  JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
                         \ key is pressed (*FX 200,3)
 
@@ -2883,33 +2879,203 @@
 
 .begn2
 
- LDA selection          \ If menu item 1 was not chosen, jump to begn3 to check
- CMP #1                 \ the next item
+                        \ If we get here then RETURN has been pressed on an info
+                        \ screen, so we need to run the relevant menu item
+
+ LDA #15                \ Call OSBYTE with A = 15 and X = 1 to flush the input
+ LDX #1                 \ buffer
+ JSR OSBYTE
+
+ LDA #225               \ Call OSBYTE with A = 225 and X = 1 to make the
+ LDX #1                 \ function keys work as normal
+ JSR OSBYTE
+
+ LDA selection          \ If menu item 0 was not chosen, jump to begn3 to check
+ CMP #0                 \ the next item
  BNE begn3
 
+                        \ If we get here then menu item 0 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
+
+ LDX #LO(command0)      \ Set (Y X) to point to command0
+ LDY #HI(command0)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command0, which
+                        \ sets the f0 key to run flicker-free Elite
+
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
+ LDY #128
+ JMP OSBYTE
+
+.begn3
+
+ CMP #1                 \ If menu item 1 was not chosen, jump to begn4 to check
+ BNE begn4              \ the next item
+
                         \ If we get here then menu item 1 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
 
  LDX #LO(command1)      \ Set (Y X) to point to command1
  LDY #HI(command1)
 
  JSR OSCLI              \ Call OSCLI to run the OS command in command1, which
-                        \ sets the f0 key to run flicker-free Elite
+                        \ sets the f0 key to run original Elite
 
- LDX #LO(command1a)      \ Set (Y X) to point to command1
- LDY #HI(command1a)
-
- LDA #138
- LDX #0
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
  LDY #128
- JSR OSBYTE
+ JMP OSBYTE
 
- RTS
+.begn4
 
-.begn3
-                        \ Otherwise we have chosen to run the selected menu
-                        \ item, so that's what we do now
+ CMP #2                 \ If menu item 2 was not chosen, jump to begn5 to check
+ BNE begn5              \ the next item
 
- RTS                    \ Return from the subroutine
+                        \ If we get here then menu item 2 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
+
+ LDX #LO(command2)      \ Set (Y X) to point to command2
+ LDY #HI(command2)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command2, which
+                        \ sets the f0 key to run Executive Elite
+
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
+ LDY #128
+ JMP OSBYTE
+
+.begn5
+
+ CMP #3                 \ If menu item 3 was not chosen, jump to begn7 to check
+ BNE begn7              \ the next item
+
+                        \ If we get here then menu item 3 was chosen
+
+ LDA #LO(MODE7_VRAM)    \ Print the text at the top of the screen
+ STA V
+ LDA #HI(MODE7_VRAM)
+ STA V+1
+
+ LDA #LO(infoArc)       \ Set P(1 0) to infoArc
+ STA P
+ LDA #HI(infoArc)
+ STA P+1
+
+ JSR PrintBlock         \ Print the text
+
+.begn6
+
+ JSR RDKEY              \ Wait for a key press
+ BEQ begn6
+
+ JMP BEGIN              \ Show the main menu
+
+.begn7
+
+ CMP #4                 \ If menu item 4 was not chosen, jump to begn8 to check
+ BNE begn8              \ the next item
+
+                        \ If we get here then menu item 4 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
+
+ LDX #LO(command4)      \ Set (Y X) to point to command4
+ LDY #HI(command4)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command4, which
+                        \ sets the f0 key to run the scoreboard
+
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
+ LDY #128
+ JMP OSBYTE
+
+.begn8
+
+ CMP #5                 \ If menu item 5 was not chosen, jump to begn9 to check
+ BNE begn9              \ the next item
+
+                        \ If we get here then menu item 5 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
+
+ LDX #LO(command5)      \ Set (Y X) to point to command5
+ LDY #HI(command5)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command5, which
+                        \ sets the f0 key to run the debugger
+
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
+ LDY #128
+ JMP OSBYTE
+
+.begn9
+
+ CMP #6                 \ If menu item 6 was not chosen, jump to begn10 to check
+ BNE begn10             \ the next item
+
+                        \ If we get here then menu item 6 was chosen
+
+ LDA #22                \ Clear the screen with a MODE 7 command
+ JSR OSWRCH
+ LDA #7
+ JSR OSWRCH
+
+ LDX #LO(command6)      \ Set (Y X) to point to command5
+ LDY #HI(command6)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in command6, which
+                        \ sets the f0 key to run the version
+
+ LDA #138               \ "Press" f0 and return from the subroutine using a
+ LDX #0                 \ tail call
+ LDY #128
+ JMP OSBYTE
+
+.begn10
+
+                        \ Menu item 7 must have been chosen, so show the About
+                        \ page
+
+ LDA #LO(MODE7_VRAM)    \ Print the text at the top of the screen
+ STA V
+ LDA #HI(MODE7_VRAM)
+ STA V+1
+
+ LDA #LO(infoAbout)     \ Set P(1 0) to infoAbout
+ STA P
+ LDA #HI(infoAbout)
+ STA P+1
+
+ JSR PrintBlock         \ Print the text
+
+.begn11
+
+ JSR RDKEY              \ Wait for a key press
+ BEQ begn11
+
+ JMP BEGIN              \ Show the main menu
 
 \ ******************************************************************************
 \
@@ -3028,10 +3194,10 @@
 
  TEXT_AT 0, 16, menuKey \ Display the menu key
 
- TEXT_AT 0, 18, menu1   \ Display the menu
- TEXT_AT 0, 20, menu2
- TEXT_AT 0, 22, menu3
- TEXT_AT 0, 24, menu4
+ TEXT_AT 0, 18, menu0   \ Display the menu
+ TEXT_AT 0, 20, menu1
+ TEXT_AT 0, 22, menu2
+ TEXT_AT 0, 24, menu3
 
  RTS                    \ Return from the subroutine
 
@@ -3046,7 +3212,20 @@
 
 .PrintInfo
 
- TEXT_AT 0, 24, infoKey \ Display the info key
+ LDA selection          \ If this is not item 3 or 7, jump to pinf1
+ AND #%11
+ CMP #%11
+ BNE pinf1
+
+ TEXT_AT 0, 24, infoKey2    \ Display the info key for text screens
+
+ JMP pinf2              \ Skip the following
+
+.pinf1
+
+ TEXT_AT 0, 24, infoKey \ Display the info key for runnable items
+
+.pinf2
 
  LDA selection          \ Set Y = selection * 2 so we can use it as an index
  ASL A                  \ into the address table at infoAddr
@@ -3062,27 +3241,46 @@
  LDA infoAddr+1,Y       \ text
  STA P+1
 
+\ ******************************************************************************
+\
+\       Name: PrintBlock
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Print a block of text on the screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   P(1 0)              The text block address
+\
+\   V(1 0)              The destination address in screen memory
+\
+\ ******************************************************************************
+
+.PrintBlock
+
  LDY #0                 \ Sey Y = 0 to act as an index into the string
 
-.pinf1
+.pblo1
 
  LDA (P),Y              \ Copy the Y-th byte of the message from P(1 0)
 
- BEQ pinf2              \ If it is zero, jump to pinf2 to return from the
+ BEQ pblo2              \ If it is zero, jump to pblo2 to return from the
                         \ subroutine
 
  STA (V),Y              \ Poke the byte into screen memory in V(1 0)
 
  INY                    \ Increment the index
 
- BNE pinf1              \ Loop back to print the next character    
+ BNE pblo1              \ Loop back to print the next character    
 
  INC V+1                \ Move on to the next page
  INC P+1
 
- BNE pinf1              \ Loop back to print the next character
+ BNE pblo1              \ Loop back to print the next character
 
-.pinf2
+.pblo2
 
  RTS                    \ Return from the subroutine
 
@@ -3223,35 +3421,27 @@
 
  EQUS 132, 157, 131, " Select with [^], RETURN for info", 0
 
-.menu1
+.menu0
 
  EQUS 134, " ", "Flicker-free Elite"
 
-.menu1a
-
  EQUS 134, " ", "Econet scoreboard", 0
 
-.menu2
+.menu1
 
  EQUS 134, " ", "Original Elite    "
 
-.menu2a
-
  EQUS 134, " ", "Econet debugger", 0
 
-.menu3
+.menu2
 
  EQUS 134, " ", "Executive Elite   "
 
-.menu3a
-
  EQUS 134, " ", "Version info", 0
 
-.menu4
+.menu3
 
  EQUS 134, " ", "Archimedes Elite  "
-
-.menu4a
 
  EQUS 134, " ", "About Econet Elite", 0
 
@@ -3266,6 +3456,7 @@
 
 .infoAddr
 
+ EQUW info0
  EQUW info1
  EQUW info2
  EQUW info3
@@ -3273,7 +3464,6 @@
  EQUW info5
  EQUW info6
  EQUW info7
- EQUW info8
 
 \ ******************************************************************************
 \
@@ -3288,7 +3478,11 @@
 
  EQUS 132, 157, 131, " ESCAPE to go back, RETURN to run", 0
 
-.info1
+.infoKey2
+
+ EQUS 132, 157, 131, "ESCAPE to go back, RETURN for info", 0
+
+.info0
 
  EQUS 132, 157, 131, "Play flicker-free Elite over Econet  "
  EQUS 134, "                                       "
@@ -3299,7 +3493,7 @@
  EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
-.info2
+.info1
 
  EQUS 132, 157, 131, "Play original Elite over Econet      "
  EQUS 134, "                                       "
@@ -3310,7 +3504,7 @@
  EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
-.info3
+.info2
 
  EQUS 132, 157, 131, "Play Executive Elite over Econet     "
  EQUS 134, "                                       "
@@ -3321,7 +3515,7 @@
  EQUS 132, " For the 6502 Second Processor only    "
  EQUB 0
 
-.info4
+.info3
 
  EQUS 132, 157, 131, "Play Archimedes Elite over Econet    "
  EQUS 134, "                                       "
@@ -3332,7 +3526,7 @@
  EQUS 134, "on how to log in from an Archimedes.   "
  EQUB 0
 
-.info5
+.info4
 
  EQUS 132, 157, 131, "Run the Elite over Econet scoreboard "
  EQUS 134, "                                       "
@@ -3343,7 +3537,7 @@
  EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
-.info6
+.info5
 
  EQUS 132, 157, 131, "Run the Elite over Econet debugger   "
  EQUS 134, "                                       "
@@ -3354,7 +3548,7 @@
  EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
-.info7
+.info6
 
  EQUS 132, 157, 131, "Elite over Econet version details    "
  EQUS 134, "                                       "
@@ -3362,10 +3556,10 @@
  EQUS 134, "command that shows the build date for  "
  EQUS 134, "the version of Elite on this server.   "
  EQUS 134, "                                       "
- EQUS 134, "You will then return to this menu.     "
+ EQUS 134, "This will log you into the UTILS user. "
  EQUB 0
 
-.info8
+.info7
 
  EQUS 132, 157, 131, "More About Elite over Econet         "
  EQUS 134, "                                       "
@@ -3378,8 +3572,8 @@
 
 .infoArc
 
- EQUS 141, 130, "    Archimedes Elite over Econet       "
- EQUS 141, 130, "    Archimedes Elite over Econet       "
+ EQUS 141, 130, "    Archimedes Elite over Econet      "
+ EQUS 141, 130, "    Archimedes Elite over Econet      "
  EQUS "                                        "
  EQUS "To play Archimedes Elite over Econet,   "
  EQUS "do the following:                       "
@@ -3394,11 +3588,14 @@
  EQUS "                                        "
  EQUS "Archimedes Elite over Econet runs on    "
  EQUS "RISC OS 3 and above.                    "
+ EQUS "                                        "
+ EQUS "Press a key to return to the menu.      "
+ EQUB 0
 
 .infoAbout
 
- EQUS 141, 130, "      About Elite over Econet          "
- EQUS 141, 130, "      About Elite over Econet          "
+ EQUS 141, 130, "      About Elite over Econet         "
+ EQUS 141, 130, "      About Elite over Econet         "
  EQUS "                                        "
  EQUS "In the old days, Elite didn't work over "
  EQUS "an Econet network. Those days are gone! "
@@ -3414,40 +3611,35 @@
  EQUS "BBC Micro, BBC Master, 6502 Second      "
  EQUS "Processor and Acorn Archimedes.         "
  EQUS "                                        "
- EQUS "For more information, visit the project"
+ EQUS "For more information, visit the project "
  EQUS "website at", 129, "bbcelite.com/econet          "
+ EQUS "                                        "
+ EQUS "Press a key to return to the menu.      "
+ EQUB 0
+
+.command0
+
+ EQUS "KEY0*BASIC|M*I AM ELITE|M", 13
 
 .command1
 
- EQUS "BASIC", 13
-
-.command1a
-
- EQUS "KEY0*I AM ELITE|M", 13
+ EQUS "KEY0*BASIC|M*I AM ELITEO|M", 13
 
 .command2
 
- EQUS "*I AM ELITEO", 13
+ EQUS "KEY0*BASIC|M*I AM ELITEX|M", 13
 
-.command3
+.command4
 
- EQUS "*I AM ELITEX", 13
-
-.command56
-
- EQUS "*I AM UTILS", 13
+ EQUS "KEY0*BASIC|M*I AM UTILS|M*ELITE S|M", 13
 
 .command5
 
- EQUS "*ELITE S", 13
+ EQUS "KEY0*BASIC|M*I AM UTILS|M*ELITE D|M", 13
 
 .command6
 
- EQUS "*ELITE D", 13
-
-.command7
-
- EQUS "*ELITE V", 13
+ EQUS "KEY0*BASIC|M*I AM UTILS|M*ELITE V|M", 13
 
 \ ******************************************************************************
 \

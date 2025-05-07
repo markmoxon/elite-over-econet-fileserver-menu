@@ -58,29 +58,6 @@
 
 .StyleTitleRow
 
- BIT displayTitle       \ If bit 7 of displayTitle is set, jump to stit4 to skip
- BMI stit4              \ displaying the title row
-
-\LDA QQ11               \ If this is not the death screen, jump to stit2 to
-\CMP #6                 \ display the title row
-\BNE stit2
-
-\.stit1
-
-\LDA #151               \ This is either the death screen or bit 7 of
-\STA MODE7_VRAM         \ displayTitle is set, so style the top row as white
-                        \ graphics
-
-\BNE stit4              \ Jump to stit4 to style the second row as white
-                        \ graphics (this BNE is effectively a JMP as A is never
-                        \ zero)
-
-\.stit2
-
-                        \ Galfax code removed as it isn't needed
-
-.stit3
-
  LDA #132               \ Style the top row as yellow text on blue background
  STA MODE7_VRAM
  LDA #157
@@ -88,31 +65,11 @@
  LDA #131
  STA MODE7_VRAM+2
 
-.stit4
-
  LDA #151               \ Style the second row as white graphics
  STA MODE7_VRAM+(1*40)
 
  LDA #134               \ Style the rest of the screen as cyan text, returning
  JMP SetMode7Colour     \ from the subroutine using a tail call
-
-\ ******************************************************************************
-\
-\       Name: displayTitle
-\       Type: Variable
-\   Category: Teletext Elite
-\    Summary: Flag to control whether to display a blue title row at the top of
-\             the screen
-\
-\ ******************************************************************************
-
-.displayTitle
-
- EQUB 0                 \ Determines whether to draw a blue title row:
-                        \
-                        \   * Bit 7 clear = draw a blue title row
-                        \
-                        \   * Bit 7 set = do not draw a blue title row
 
 \ ******************************************************************************
 \
