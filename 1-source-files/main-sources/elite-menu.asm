@@ -2852,6 +2852,11 @@
  LDX #CYL               \ Set TYPE to show a rotating Cobra Mk III (#CYL) in the
  STX TYPE               \ call to TITLE
 
+ JSR ClearShipScreen    \ Clear the ship screen
+
+ LDA #151               \ Set the ship colour to white
+ JSR SetShipColour
+
  LDX #128              \ Set shipDistance = (1 128) for the Cobra
  STX shipDistance
  LDX #1
@@ -2865,6 +2870,11 @@
  LDY selection          \ Set TYPE to the correct ship for this menu
  LDA menuShip,Y
  STA TYPE
+
+ JSR ClearShipScreen    \ Clear the ship screen
+
+ LDA menuShipColour,Y   \ Set the correct ship colour for this menu
+ JSR SetShipColour
 
  LDA menuDistanceLo,Y   \ Set shipDistance to the correct distance for this ship
  STA shipDistance
@@ -2984,7 +2994,12 @@
 .begn6
 
  JSR RDKEY              \ Wait for a key press
- BEQ begn6
+ BNE begn6
+
+.begn6a
+
+ JSR RDKEY              \ Wait for a key press
+ BEQ begn6a
 
  JMP BEGIN              \ Show the main menu
 
@@ -3076,8 +3091,13 @@
 
 .begn11
 
+ JSR RDKEY              \ Wait for any keys being pressed to be released
+ BNE begn11
+
+.begn12
+
  JSR RDKEY              \ Wait for a key press
- BEQ begn11
+ BEQ begn12
 
  JMP BEGIN              \ Show the main menu
 
@@ -3371,6 +3391,26 @@
 
 \ ******************************************************************************
 \
+\       Name: menuShip
+\       Type: Variable
+\   Category: Server menu
+\    Summary: The ship type for each menu item
+\
+\ ******************************************************************************
+
+.menuShipColour
+
+ EQUB 150               \ Sidewinder
+ EQUB 150               \ Krait
+ EQUB 149               \ Thargoid (magenta)
+ EQUB 145               \ Asteroid (red)
+ EQUB 150               \ Mamba
+ EQUB 150               \ Python
+ EQUB 150               \ Viper
+ EQUB 150               \ Constrictor
+
+\ ******************************************************************************
+\
 \       Name: menuDistanceLo
 \       Type: Variable
 \   Category: Server menu
@@ -3509,89 +3549,89 @@
 .info0
 
  EQUS 132, 157, 131, "Play flicker-free Elite over Econet  "
- EQUS 134, "                                       "
- EQUS 134, "The recommended option. Play Elite over"
- EQUS 134, "Econet and join online competitions,   "
- EQUS 134, "with flicker-free ships and planets.   "
- EQUS 134, "                                       "
- EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUS 131, "                                       "
+ EQUS 131, "The recommended option. Play Elite over"
+ EQUS 131, "Econet  and  join  online competitions,"
+ EQUS 131, "with flicker-free ships and planets.   "
+ EQUS 131, "                                       "
+ EQUS 129, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
 .info1
 
- EQUS 132, 157, 131, "Play original Elite over Econet      "
- EQUS 134, "                                       "
- EQUS 134, "If you like your graphics authentically"
- EQUS 134, "flickery, and with the 6502SP version  "
- EQUS 134, "running at full speed, this is for you."
- EQUS 134, "                                       "
- EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUS 132, 157, 131, "  Play original Elite over Econet    "
+ EQUS 131, "                                       "
+ EQUS 131, "If you like your graphics authentically"
+ EQUS 131, "flickery,  and  with the 6502SP version"
+ EQUS 131, "running at full speed, this is for you."
+ EQUS 131, "                                       "
+ EQUS 129, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
 .info2
 
- EQUS 132, 157, 131, "Play Executive Elite over Econet     "
- EQUS 134, "                                       "
- EQUS 134, "The flicker-free version of Executive  "
- EQUS 134, "Elite over Econet, with its fancy font "
- EQUS 134, "and the famous Pizzasoft scroll text.  "
- EQUS 134, "                                       "
- EQUS 132, " For the 6502 Second Processor only    "
+ EQUS 132, 157, 131, " Play Executive Elite over Econet    "
+ EQUS 131, "                                       "
+ EQUS 131, "The  flicker-free  version of Executive"
+ EQUS 131, "Elite over Econet,  with its fancy font"
+ EQUS 131, "and the famous Pizzasoft scroll text.  "
+ EQUS 131, "                                       "
+ EQUS 129, "  For the 6502 Second Processor only   "
  EQUB 0
 
 .info3
 
- EQUS 132, 157, 131, "Play Archimedes Elite over Econet    "
- EQUS 134, "                                       "
- EQUS 134, "Many think this is the best version of "
- EQUS 134, "Elite, and now RISC OS players can join"
- EQUS 134, "online competitions alongside BBC Micro"
- EQUS 134, "commanders. Choose this option for info"
- EQUS 134, "on how to log in from an Archimedes.   "
+ EQUS 132, 157, 131, " Play Archimedes Elite over Econet   "
+ EQUS 131, "                                       "
+ EQUS 131, "Many think  this is the best version of"
+ EQUS 131, "Elite, and now RISC OS players can join"
+ EQUS 131, "online competitions alongside BBC Micro"
+ EQUS 131, "commanders. Choose this option for info"
+ EQUS 131, "on how to log in from an Archimedes.   "
  EQUB 0
 
 .info4
 
  EQUS 132, 157, 131, "Run the Elite over Econet scoreboard "
  EQUS 134, "                                       "
- EQUS 134, "Host your very own Elite scoreboard    "
- EQUS 134, "with this option. See the website at   "
- EQUS 134, "bbcelite.com/econet for more details.  "
- EQUS 134, "                                       "
- EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUS 131, "Host  your  very  own  Elite scoreboard"
+ EQUS 131, "with this option.  See  the  website at"
+ EQUS 131, "bbcelite.com/econet for more details.  "
+ EQUS 131, "                                       "
+ EQUS 129, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
 .info5
 
  EQUS 132, 157, 131, "Run the Elite over Econet debugger   "
  EQUS 134, "                                       "
- EQUS 134, "Use the debugger to test your network  "
- EQUS 134, "for playing Elite. See the website at  "
- EQUS 134, "bbcelite.com/econet for more details.  "
- EQUS 134, "                                       "
- EQUS 132, " For BBC Micro, BBC Master and 6502SP  "
+ EQUS 131, "Use the debugger  to test your  network"
+ EQUS 131, "for playing Elite.  See the  website at"
+ EQUS 131, "bbcelite.com/econet for more details.  "
+ EQUS 131, "                                       "
+ EQUS 129, " For BBC Micro, BBC Master and 6502SP  "
  EQUB 0
 
 .info6
 
- EQUS 132, 157, 131, "Elite over Econet version details    "
+ EQUS 132, 157, 131, " Elite over Econet version details   "
  EQUS 134, "                                       "
- EQUS 134, "Choose this option to run a *ELITE V   "
- EQUS 134, "command that shows the build date for  "
- EQUS 134, "the version of Elite on this server.   "
- EQUS 134, "                                       "
- EQUS 134, "This will log you into the UTILS user. "
+ EQUS 131, "Choose  this option  to run a  *ELITE V"
+ EQUS 131, "command that  shows the  build date for"
+ EQUS 131, "the version of Elite on this server. If"
+ EQUS 131, "you choose  this option,  it will leave"
+ EQUS 131, "you logged into the UTILS user."
  EQUB 0
 
 .info7
 
- EQUS 132, 157, 131, "More About Elite over Econet         "
+ EQUS 132, 157, 131, "   More About Elite over Econet      "
  EQUS 134, "                                       "
- EQUS 134, "Find out more about the Elite over     "
- EQUS 134, "Econet project, and where to go for    "
- EQUS 134, "installation instructions, download    "
- EQUS 134, "links, technical information, playing  "
- EQUS 134, "tips and lots more.                    "
+ EQUS 131, "Find  out  more  about  the  Elite over"
+ EQUS 131, "Econet  project,  and  where to go  for"
+ EQUS 131, "installation   instructions,   download"
+ EQUS 131, "links,  technical information,  playing"
+ EQUS 131, "tips and lots more.                    "
  EQUB 0
 
 .infoArc

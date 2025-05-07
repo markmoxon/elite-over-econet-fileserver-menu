@@ -142,3 +142,61 @@
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: SetShipColour
+\       Type: Subroutine
+\   Category: Teletext Elite
+\    Summary: Insert the graphics control character in A at the start of each
+\             row in the ship view
+\
+\ ******************************************************************************
+
+.SetShipColour
+
+ FOR n, 1, 15
+  STA MODE7_VRAM + n*40 \ Set rows 2 to 24 to the control character in A
+ NEXT
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ClearMode7Screen
+\       Type: Subroutine
+\   Category: Teletext Elite
+\    Summary: Clear the mode 7 screen
+\
+\ ******************************************************************************
+
+.ClearShipScreen
+
+ LDA #0                 \ Set A = 0 so we can zero screen memory
+
+ LDX #1                 \ Set a byte counter in X, starting from 1 so we skip
+                        \ the graphics/text control character
+
+.clsp1
+
+ STA MODE7_VRAM+(1*40),X   \ Zero the X-th byte of rows 1 to 15
+ STA MODE7_VRAM+(2*40),X
+ STA MODE7_VRAM+(3*40),X
+ STA MODE7_VRAM+(4*40),X
+ STA MODE7_VRAM+(5*40),X
+ STA MODE7_VRAM+(6*40),X
+ STA MODE7_VRAM+(7*40),X
+ STA MODE7_VRAM+(8*40),X
+ STA MODE7_VRAM+(9*40),X
+ STA MODE7_VRAM+(10*40),X
+ STA MODE7_VRAM+(11*40),X
+ STA MODE7_VRAM+(12*40),X
+ STA MODE7_VRAM+(13*40),X
+ STA MODE7_VRAM+(14*40),X
+ STA MODE7_VRAM+(15*40),X
+
+ INX                    \ Increment the byte counter
+
+ CPX #40                \ Loop back until we have cleared the whole row
+ BCC clsp1
+
+ RTS                    \ Return from the subroutine
