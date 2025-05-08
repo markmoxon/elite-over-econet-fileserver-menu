@@ -2991,15 +2991,7 @@
 
  JSR PrintBlock         \ Print the text
 
-.begn6
-
- JSR RDKEY              \ Wait for a key press
- BNE begn6
-
-.begn6a
-
- JSR RDKEY              \ Wait for a key press
- BEQ begn6a
+ JSR WaitForKey         \ Wait for a key press
 
  JMP BEGIN              \ Show the main menu
 
@@ -3091,15 +3083,44 @@
 
 .begn11
 
- JSR RDKEY              \ Wait for any keys being pressed to be released
- BNE begn11
+ JSR WaitForKey         \ Wait for a key press
 
-.begn12
+ LDA #LO(MODE7_VRAM)    \ Print the text at the top of the screen
+ STA V
+ LDA #HI(MODE7_VRAM)
+ STA V+1
 
- JSR RDKEY              \ Wait for a key press
- BEQ begn12
+ LDA #LO(infoAbout2)    \ Set P(1 0) to infoAbout2
+ STA P
+ LDA #HI(infoAbout2)
+ STA P+1
+
+ JSR PrintBlock         \ Print the text
+
+ JSR WaitForKey         \ Wait for a key press
 
  JMP BEGIN              \ Show the main menu
+
+\ ******************************************************************************
+\
+\       Name: WaitForKey
+\       Type: Subroutine
+\   Category: Server menu
+\    Summary: Wait for a key press, with debounce
+\
+\ ******************************************************************************
+
+.WaitForKey
+
+ JSR RDKEY              \ Wait for any keys being pressed to be released
+ BNE WaitForKey
+
+.wait1
+
+ JSR RDKEY              \ Wait for a key press
+ BEQ wait1
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3627,58 +3648,91 @@
 
  EQUS 132, 157, 131, "   More About Elite over Econet      "
  EQUS 134, "                                       "
- EQUS 131, "Find  out  more  about  the  Elite over"
- EQUS 131, "Econet  project,  and  where to go  for"
- EQUS 131, "installation   instructions,   download"
- EQUS 131, "links,  technical information,  playing"
- EQUS 131, "tips and lots more.                    "
+ EQUS 131, "All about the Elite over Econet project"
+ EQUS 131, "and how  to use this  fileserver,  plus"
+ EQUS 131, "where to find download links, technical"
+ EQUS 131, "information, playing tips, installation"
+ EQUS 131, "instructions and lots more.            "
  EQUB 0
 
 .infoArc
 
  EQUS 141, 130, "    Archimedes Elite over Econet      "
  EQUS 141, 130, "    Archimedes Elite over Econet      "
- EQUS "                                        "
- EQUS "To play Archimedes Elite over Econet,   "
- EQUS "do the following:                       "
- EQUS "                                        "
- EQUS " * In the RISC OS Desktop, use the      "
- EQUS "   Econet fileserver icon to log in to  "
- EQUS "   server 63.13 as user ARCELITE (there "
- EQUS "   is no password).                     "
- EQUS "                                        "
- EQUS " * Then follow the instructions in the  "
- EQUS "   !ReadMe file (double-click to load). "
- EQUS "                                        "
- EQUS "Archimedes Elite over Econet runs on    "
- EQUS "RISC OS 3 and above.                    "
- EQUS "                                        "
- EQUS "Press a key to return to the menu.      "
+ EQUS 134, "                                       "
+ EQUS 131, "Now 32-bit Elite commanders can join in"
+ EQUS 131, "and play alongside the 8-bit experts.  "
+ EQUS 134, "                                       "
+ EQUS 134, "To play Archimedes Elite over Econet,  "
+ EQUS 134, "do the following:                      "
+ EQUS 134, "                                       "
+ EQUS 134, " * In the RISC OS Desktop, use the     "
+ EQUS 134, "   Econet fileserver icon to log in to "
+ EQUS 134, "   server", 129, "63.13", 134, "as user", 129, "ARCELITE", 134, "(there"
+ EQUS 134, "   is no password).                    "
+ EQUS 134, "                                       "
+ EQUS 134, " * Then follow the instructions in the "
+ EQUS 134, "  ", 129, "!ReadMe", 134, "file (double-click to load)."
+ EQUS 134, "                                       "
+ EQUS 134, "Archimedes Elite over Econet runs on   "
+ EQUS 134, "RISC OS 3 and above.                   "
+ EQUS 134, "                                       "
+ EQUS 131, "Press any key to return to the menu.   "
  EQUB 0
 
 .infoAbout
 
- EQUS 141, 130, "      About Elite over Econet         "
- EQUS 141, 130, "      About Elite over Econet         "
- EQUS "                                        "
- EQUS "In the old days, Elite didn't work over "
- EQUS "an Econet network. Those days are gone! "
- EQUS "                                        "
- EQUS "Not only does Elite now load from all   "
- EQUS "Econet fileservers, but you can join    "
- EQUS "multiplayer competitions and compete    "
- EQUS "for the highest scores against players  "
- EQUS "from all over the world.                "
- EQUS "                                        "
- EQUS "This server always hosts the very       "
- EQUS "latest version of the game, for the     "
- EQUS "BBC Micro, BBC Master, 6502 Second      "
- EQUS "Processor and Acorn Archimedes.         "
- EQUS "                                        "
- EQUS "For more information, visit the project "
- EQUS "website at", 129, "bbcelite.com/econet          "
- EQUS "                                        "
- EQUS "Press a key to return to the menu.      "
+ EQUS 141, 130, "       About Elite over Econet        "
+ EQUS 141, 130, "       About Elite over Econet        "
+ EQUS 134, "                                       "
+ EQUS 131, "In the old days, Elite didn't work over"
+ EQUS 131, "an Econet network. Those days are gone!"
+ EQUS 134, "                                       "
+ EQUS 134, "Not only does Elite now load from all  "
+ EQUS 134, "Econet fileservers, but you can join   "
+ EQUS 134, "multiplayer competitions and compete   "
+ EQUS 134, "for the highest scores against players "
+ EQUS 134, "from all over the world.               "
+ EQUS 134, "                                       "
+ EQUS 134, "This server always hosts the very      "
+ EQUS 134, "latest version of the game, for the    "
+ EQUS 134, "BBC Micro, BBC Master, 6502 Second     "
+ EQUS 134, "Processor and Acorn Archimedes.        "
+ EQUS 134, "                                       "
+ EQUS 134, "For more information, visit the project"
+ EQUS 134, "website at", 129, "bbcelite.com/econet         "
+ EQUS 134, "                                       "
+ EQUS 131, "Press any key for information about    "
+ EQUS 131, "this fileserver.                        "
+ EQUB 0
+
+.infoAbout2
+
+ EQUS 141, 130, "        About this fileserver         "
+ EQUS 141, 130, "        About this fileserver         "
+ EQUS 134, "                                       "
+ EQUS 134, "This fileserver hosts various users    "
+ EQUS 134, "that you can use to log in. They are:  "
+ EQUS 134, "                                       "
+ EQUS 129, "*I AM 63.13 BOOT  ", 134, "- this menu         "
+ EQUS 134, "                                       "
+ EQUS 131, "*I AM 63.13 ELITE ", 134, "- flicker-free Elite"
+ EQUS 134, "                                       "
+ EQUS 132, "*I AM 63.13 ELITEO", 134, "- original Elite    "
+ EQUS 134, "                                       "
+ EQUS 133, "*I AM 63.13 ELITEX", 134, "- Executive Elite   "
+ EQUS 134, "                                       "
+ EQUS 130, "*I AM 63.13 UTILS ", 134, "- lets you run the  "
+ EQUS 134, "                     utility commands: "
+ EQUS 134, "                                       "
+ EQUS 130,"      *ELITE S", 134, "runs the scoreboard     "
+ EQUS 130,"      *ELITE D", 134, "runs the debugger       "
+ EQUS 130,"      *ELITE V", 134, "shows the version       "
+ EQUS 134, "                                       "
+ EQUS 134, "For more information, visit the project"
+ EQUS 134, "website at", 129, "bbcelite.com/econet         "
+ EQUS 134, "                                       "
+ EQUS 131, "Press any key to return to the menu.   "
  EQUB 0
 
 .command0
