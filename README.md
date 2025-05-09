@@ -1,6 +1,16 @@
-# Elite over Econet server files
+# Elite over Econet fileserver menu
 
-This repository contains source code for the Elite over Econet server on the TNMoC Econet Cloud.
+This repository contains source code for the Elite over Econet fileserver on the TNMoC Econet Cloud. It uses routines from [Teletext Elite](https://github.com/markmoxon/teletext-elite) to display rotating ships in the BBC Micro's mode 7, and adds a simple menu showing the options available on the server.
+
+![Screenshot of the Elite over Econet fileserver menu](https://elite.bbcelite.com/images/elite_over_econet/fileserver_menu.png)
+
+If you have an Econet network with a Pi Econet Bridge, then you can visit the Elite over Econet fileserver on the TNMoC Econet Cloud like this:
+
+```
+*I AM 63.13 BOOT
+```
+
+This will run the menu system in this repository. You can find out more about the Elite over Econet fileserver from the menu, or by visiting the [bbcelite.com website](https://elite.bbcelite.com/hacks/elite_over_econet.html).
 
 ## Contents
 
@@ -19,8 +29,6 @@ The commentary and Teletext conversion code are copyright &copy; Mark Moxon. Any
 The Teletext routines are by Kieran Connell and Simon Morris of the Bitshifters, and were adapted from Bresenham routines by Rich Talbot-Watkins. See the [Bitshifters teletextr](https://github.com/bitshifters/teletextr/tree/master/lib) repository for the original code.
 
 Huge thanks are due to the original authors for not only creating such an important piece of my childhood, but also for releasing the source code for us to play with; to Paul Brink for his annotated disassembly; and to Kieran Connell for his [BeebAsm version](https://github.com/kieranhj/elite-beebasm), which I forked as the original basis for this project. You can find more information about this project in the [accompanying website's project page](https://elite.bbcelite.com/about_site/about_this_project.html).
-
-Thanks to the Bitshifters for their help in building the [musical version of BBC Micro Elite](#bbc-micro-elite-with-music), and in particular Kieran Connell, Simon Morris and Negative Charge for the music player and ported music files. Thanks also to Tricky and J.G.Harston for their sideways RAM utilities.
 
 The following archive from Ian Bell's personal website forms the basis for this project:
 
