@@ -59,11 +59,14 @@ yet!
 
 ***
 
-You may find it quicker to copy the ArcElite and
+I recommend that you copy both the ArcElite and
 EliteNet directories to your hard disc and run the
 applications from there. They can both be loaded
 over Econet, but it is much faster to run them
-from local storage.
+from local storage, and you won't be able to save
+your preferences in Elite unless you copy the game
+to somewhere where you have write permissions,
+which won't be the case with this fileserver.
 
 Right on, Commanders!
 
