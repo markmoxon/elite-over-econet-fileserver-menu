@@ -148,11 +148,6 @@
 
 .ENTRY
 
- LDA #144               \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
- LDX #255               \ the screen down one line and turn screen interlace on
- LDY #0
- JSR OSBYTE
-
  LDA #LO(B%)            \ Set the low byte of ZP(1 0) to point to the VDU code
  STA ZP                 \ table at B%
 
