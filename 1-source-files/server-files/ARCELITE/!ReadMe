@@ -6,16 +6,16 @@ This server contains two directories:
 * ArcElite contains version 1.14 of Archimedes Elite
 from Ian Bell's personal website.
 
-* EliteNet contains the !EliteNet application that
+* EliteNet contains the EliteNet application that
 lets Archimedes Elite send scores to a multiplayer
 scoreboard over Econet.
 
 For information about Elite, see the !!ReadMe file
 and Docs directory in ArcElite.
 
-For information about !EliteNet, click Menu on the
-!EliteNet application in the EliteNet directory
-display and choose Help from the App submenu.
+For information about EliteNet, click Menu on the
+application icon in the Filer and choose Help from
+the App. '!EliteNet' submenu.
 
 I recommend that you copy both the ArcElite and
 EliteNet directories to your hard disc and run the
@@ -36,5 +36,5 @@ Archimedes Elite was written by Warren Burch and
 Clive Gringras and is copyright (c) Hybrid
 Technology 1991.
 
-!EliteNet is copyright (c) Mark Moxon and has been
+EliteNet is copyright (c) Mark Moxon and has been
 released under the MIT licence.
