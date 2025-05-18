@@ -5,10 +5,10 @@ This server contains three directories:
 
 * ArcElite contains version 1.14 of Archimedes Elite
 from Ian Bell's personal website. This version works
-on Archimedes machines with RISC OS 3.
+on Archimedes machines with RISC OS 3.10 and above.
 
 * RiscElite contains an amended version of Elite
-that works on a Risc PC.
+that works on Risc PCs with RISC OS 3.5 and above.
 
 * EliteNet contains the EliteNet application that
 lets Archimedes Elite send scores to a multiplayer
@@ -22,14 +22,14 @@ For information about EliteNet, click Menu on the
 application icon in the Filer and choose Help from
 the App. '!EliteNet' submenu.
 
-I recommend that you copy both the ArcElite and
-EliteNet directories to your hard disc and run the
-applications from there. They can both be loaded
-over Econet, but it is much faster to run them
-from local storage, and you won't be able to save
-your preferences in Elite unless you copy the game
-to somewhere where you have write permissions,
-which won't be the case with this fileserver.
+I recommend that you copy the ArcElite, RiscElite
+and EliteNet directories to your hard disc and run
+the applications from there. They can all be loaded
+over Econet, but it is much faster to run them from
+local storage, and you won't be able to save your
+preferences in Elite unless you copy the game to
+somewhere where you have write permissions, which
+won't be the case with this fileserver.
 
 Right on, Commanders!
 
