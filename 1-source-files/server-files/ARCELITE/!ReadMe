@@ -1,10 +1,14 @@
 Archimedes Elite over Econet
 by Mark Moxon, Warren Burch and Clive Gringras
 
-This server contains two directories:
+This server contains three directories:
 
 * ArcElite contains version 1.14 of Archimedes Elite
-from Ian Bell's personal website.
+from Ian Bell's personal website. This version works
+on Archimedes machines with RISC OS 3.
+
+* RiscElite contains an amended version of Elite
+that works on a Risc PC.
 
 * EliteNet contains the EliteNet application that
 lets Archimedes Elite send scores to a multiplayer
@@ -12,7 +16,7 @@ scoreboard over Econet. There's also a configuration
 file for the TNMoC Econet Cloud scoreboard.
 
 For information about Elite, see the !!ReadMe file
-and Docs directory in ArcElite.
+and Docs directory in ArcElite or RiscElite.
 
 For information about EliteNet, click Menu on the
 application icon in the Filer and choose Help from
