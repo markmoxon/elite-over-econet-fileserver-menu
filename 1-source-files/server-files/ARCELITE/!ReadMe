@@ -8,7 +8,8 @@ from Ian Bell's personal website.
 
 * EliteNet contains the EliteNet application that
 lets Archimedes Elite send scores to a multiplayer
-scoreboard over Econet.
+scoreboard over Econet. There's also a configuration
+file for the TNMoC Econet Cloud scoreboard.
 
 For information about Elite, see the !!ReadMe file
 and Docs directory in ArcElite.
