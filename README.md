@@ -12,12 +12,6 @@ If you have an Econet network with a Pi Econet Bridge, then you can visit the El
 
 This will run the menu system in this repository. You can find out more about the Elite over Econet fileserver from the menu, or by visiting the [bbcelite.com website](https://elite.bbcelite.com/hacks/elite_over_econet.html).
 
-## Contents
-
-* [Acknowledgements](#acknowledgements)
-
-  * [A note on licences, copyright etc.](#user-content-a-note-on-licences-copyright-etc)
-
 ## Acknowledgements
 
 Elite was written by Ian Bell and David Braben and is copyright &copy; Acornsoft 1984.
